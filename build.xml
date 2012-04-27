@@ -1,0 +1,84 @@
+<project name="pivotalsync" default="all">
+  <property name="src.dir" value="src"/>
+  <property name="test.dir" value="acceptance"/>
+	
+  <target name="init">
+	<exec executable="./dependencies.sh" failonerror="true"/>
+  </target>
+
+  <target name="test" depends="init">
+  	<apply executable="coverage" failonerror="true">
+	  <arg value="run"/>
+      <arg value="-p"/>
+	  <fileset dir="${src.dir}">
+	    <patternset>
+	      <include name="**/*_test.py"/>
+	    </patternset>
+	  </fileset>
+	</apply>
+  </target>
+  
+  <target name="coverage" depends="init">
+  	<exec executable="coverage" failonerror="true">
+  		<arg value="combine"/>
+  	</exec>
+  	<exec executable="coverage" failonerror="true">
+		<arg value="report"/>
+		<arg value="-m"/>
+		<arg value="--omit=*_test.py,/usr/*,/*pytracker.py,*_acceptance.py,*config.py"/>
+	</exec>
+  	<exec executable="coverage" failonerror="true">
+  		<arg value="erase"/>
+  	</exec>
+  </target>
+	
+  <target name="acceptance" depends="init">
+  	<parallel>
+  		<exec executable="coverage" failonerror="true">
+  			<arg value="run"/>
+	  		<arg value="-p"/>
+	  		<arg value="${test.dir}/pivotal_acceptance.py" />
+  		</exec>
+  		<exec executable="coverage" failonerror="true">
+  			<arg value="run"/>
+	  		<arg value="-p"/>
+	  		<arg value="${test.dir}/jira_acceptance.py" />
+  		</exec>
+  	</parallel>
+  	
+  	<exec executable="coverage" failonerror="true">
+		<arg value="run"/>
+  		<arg value="-p"/>
+  		<arg value="${test.dir}/sync_acceptance.py" />
+	</exec>
+  </target>
+	
+  <target name="dontuse-lint" depends="init,test">
+	<apply executable="pylint" failonerror="true">
+	  <arg value="--disable=C" />
+	  <arg value="--rcfile=.pylintrc" />
+	  <fileset dir="${src.dir}">
+	    <patternset>
+	      <include name="**/*.py"/>	
+	      <exclude name="**/*_test.py"/>
+	      <exclude name="*pytraker*"/>	
+	    </patternset>
+	  </fileset>
+	</apply>
+  </target>
+  
+  <target name="test-coverage" depends="init,clean,test,coverage" />
+
+  <target name="acceptance-coverage" depends="init,clean,acceptance,coverage" />
+	
+  <target name="all" depends="test-coverage,acceptance-coverage" />
+  	
+  <target name="clean">
+  	<exec executable="coverage" failonerror="true">
+  		<arg value="erase"/>
+  	</exec>
+  </target>
+  
+</project>
+
+
