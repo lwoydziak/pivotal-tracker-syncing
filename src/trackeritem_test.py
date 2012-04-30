@@ -46,6 +46,24 @@ class TrackerItemTests(unittest.TestCase):
         item1.syncWith(item2)
         self.assertEqual(item1.description(), descriptionToSync)
         
+    def test_canAddNewComment(self):
+        newComment = "new Comment"
+        item = TrackerItem()
+        item.addComment(newComment)
+        self.assertEqual(item.newComments()[0], newComment)
+        
+    def test_canAddExistingComment(self):
+        existingComment = {'id':1, 'text':"existing comment"}
+        item = TrackerItem()
+        item.addComment(existingComment)
+        self.assertEqual(item.comments()[0], existingComment)
+    
+    def test_canCopyNewComments(self):
+        item = TrackerItem()
+        commentsToCopy = ["comment1", "comment2"]
+        item.withNewComments(commentsToCopy)
+        self.assertEqual(item.newComments(), commentsToCopy) 
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

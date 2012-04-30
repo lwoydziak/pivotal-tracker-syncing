@@ -30,7 +30,7 @@ class PivotalTrackerFor(Tracker):
         super(PivotalTrackerFor, self).selectProject(number)
         self.trackerInstance_ = self.apiObject_.Tracker(self.project_, self.authentication_)
     
-    def items(self):
+    def _getItems(self):
         times = 3
         while times > 0:
             stories = self._tryToGetStories()
@@ -53,7 +53,8 @@ class PivotalTrackerFor(Tracker):
             story = self.trackerInstance_.AddNewStory(item.underlying())
         else:
             story = self.trackerInstance_.UpdateStory(item.underlying())
-        return PivotalTrackerItem(story)        
+        updatedItem = PivotalTrackerItem(story).withNewComments(item.newComments())
+        self.updateCommentsFor(updatedItem)        
         
     def _deleteById(self, itemId):
         if itemId is None:
@@ -62,3 +63,13 @@ class PivotalTrackerFor(Tracker):
         
     def _storiesToItems(self, stories):
         return self._convertToItems(PivotalTrackerItem, stories)
+    
+    def updateItemWithComments(self, item):
+        comments = self.trackerInstance_.GetComments(item.Id())
+        for comment in comments:
+            item.addComment(comment)
+        return item
+    
+    def updateCommentsFor(self, item):
+        for comment in item.newComments():
+            self.trackerInstance_.AddComment(item.Id(), comment)

@@ -10,6 +10,9 @@ from mockito.mocking import mock
 from mockito.matchers import any
 from pytracker import Story
 from mockito.verification import never
+from datetime import datetime
+from pivotaltrackeritem import PivotalTrackerItem
+from mockito import inorder
 
 
 class PivotalTrackerTest(unittest.TestCase):
@@ -56,6 +59,7 @@ class PivotalTrackerTest(unittest.TestCase):
         pivotalProjectNumber = 0
         tracker.selectProject(pivotalProjectNumber)
         when(trackerInstance).GetStories().thenReturn([Story(),Story()])
+        when(trackerInstance).GetComments(any()).thenReturn([])
         items = tracker.items()
         self.assertEqual(len(items), 2)
         
@@ -87,22 +91,9 @@ class PivotalTrackerTest(unittest.TestCase):
         when(pivotalTrackerItem).underlying().thenReturn(story)
         when(pivotalTrackerItem).Id().thenReturn(None)
         when(trackerInstance).AddNewStory(any()).thenReturn(mock())
+        when(pivotalTrackerItem).newComments().thenReturn([])
         tracker.update(pivotalTrackerItem)
         verify(trackerInstance).AddNewStory(story)
-        pass
-    
-    def test_trackerReturnsUpdatedItemAfterAdded(self):
-        tracker = self.makeValidTracker()
-        trackerInstance = self.trackerInstance_
-        pivotalTrackerItem = mock()
-        story = mock()
-        updatedTrackerItem = Story()
-        updatedTrackerItem.story_id = 1234
-        when(pivotalTrackerItem).underlying().thenReturn(story)
-        when(pivotalTrackerItem).Id().thenReturn(None)
-        when(trackerInstance).AddNewStory(any()).thenReturn(updatedTrackerItem)
-        updatedItem = tracker.update(pivotalTrackerItem)
-        self.assertEqual(updatedItem.underlying().GetStoryId(), updatedTrackerItem.GetStoryId())
         pass
     
     def test_trackerCanDeleteItem(self):
@@ -132,6 +123,7 @@ class PivotalTrackerTest(unittest.TestCase):
         item2 = Story()
         item2.story_id = 12345
         when(trackerInstance).GetStories().thenReturn([item1,item2])
+        when(trackerInstance).GetComments(any()).thenReturn([])
         tracker.deleteAllItems()
         verify(trackerInstance).DeleteStory(item1.story_id)
         verify(trackerInstance).DeleteStory(item2.story_id)
@@ -154,6 +146,7 @@ class PivotalTrackerTest(unittest.TestCase):
         when(pivotalTrackerItem).underlying().thenReturn(story)
         when(pivotalTrackerItem).Id().thenReturn(storyId)
         when(trackerInstance).AddNewStory(any()).thenReturn(mock())
+        when(pivotalTrackerItem).newComments().thenReturn([])
         when(trackerInstance).UpdateStory(any()).thenReturn(mock())
         tracker.update(pivotalTrackerItem)
         verify(trackerInstance).UpdateStory(story)
@@ -167,8 +160,68 @@ class PivotalTrackerTest(unittest.TestCase):
         pivotalProjectNumber = 0
         tracker.selectProject(pivotalProjectNumber)
         when(trackerInstance).GetStories().thenRaise(Exception("")).thenReturn([Story(),Story()])
+        when(trackerInstance).GetComments(any()).thenReturn([])
         tracker.items()
         verify(trackerInstance, times=2).GetStories()
+        
+    def test_canGetCommentsForTicket(self):
+        tracker = self.makeValidTracker()
+        trackerInstance = self.trackerInstance_
+        story = mock()
+        storyId = "12345"
+        twoComments = [{'id': 1234, 'noted_at':datetime.now(), 'author':"lwoydziak", 'text':"Comment 1"}, {'id': 1234, 'noted_at':datetime.now(), 'author':"lwoydziak", 'text':"Comment2"}]
+        when(story).Id().thenReturn(storyId)
+        when(trackerInstance).GetComments(any()).thenReturn(twoComments)
+        tracker.updateItemWithComments(story)
+        verify(trackerInstance).GetComments(storyId)
+        verify(story, times=2).addComment(any())
+        pass
+    
+    def test_canAddCommentsToStoryTicket(self):
+        tracker = self.makeValidTracker()
+        trackerInstance = self.trackerInstance_
+        comment1 = "comment1"
+        comment2 = "comment2"
+        issue = Story()
+        issue.story_id = "1234"
+        item = PivotalTrackerItem(issue)
+        item.addComment(comment1)
+        item.addComment(comment2)
+        tracker.updateCommentsFor(item)
+        inorder.verify(trackerInstance).AddComment(issue.GetStoryId(), comment1)
+        inorder.verify(trackerInstance).AddComment(issue.GetStoryId(), comment2)
+        pass
+    
+    def test_updateAddsNewComments(self):
+        tracker = self.makeValidTracker()
+        trackerInstance = self.trackerInstance_
+        comment1 = "comment1"
+        comment2 = "comment2"
+        issue = Story()
+        issue.story_id = "1234"
+        updatedStory = mock()
+        item = PivotalTrackerItem(issue)
+        item.addComment(comment1)
+        item.addComment(comment2)
+        when(trackerInstance).UpdateStory(any()).thenReturn(updatedStory)
+        when(updatedStory).GetName().thenReturn("")
+        tracker.update(item)
+        verify(trackerInstance, times=2).AddComment(any(), any())
+        pass
+    
+    def test_gettingItemAlsoGetsCommentsForItem(self):
+        tracker = self.makeValidTracker()
+        trackerInstance = self.trackerInstance_
+        story1 = Story()
+        story1.story_id = 1234
+        story2 = Story()
+        story2.story_id = 1235
+        when(trackerInstance).GetStories().thenReturn([story1,story2])
+        when(trackerInstance).GetComments(any()).thenReturn([])
+        items = tracker.items()
+        inorder.verify(trackerInstance).GetStories()
+        inorder.verify(trackerInstance).GetComments(story1.GetStoryId())
+        inorder.verify(trackerInstance).GetComments(story2.GetStoryId())
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

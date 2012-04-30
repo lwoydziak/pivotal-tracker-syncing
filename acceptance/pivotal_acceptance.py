@@ -86,7 +86,17 @@ class PivotalAcceptanceTest(unittest.TestCase):
         items = tracker.items()
         self.assertEqual(items[0].jiraUrl(), newUrl)
         self.assertEqual(items[0].jiraKey(), jiraTicketKey)
-        
+
+    def test_canAddCommentsToStory(self):
+        tracker = self.pivotal_
+        item = PivotalTrackerItem().withSummary("test_canAddCommentsToStory").withDescription("description")
+        tracker.update(item)
+        items = tracker.items()
+        aComment = "I am adding this comment"
+        items[0].addComment(aComment)
+        tracker.update(items[0])
+        items = tracker.items()
+        self.assertEqual(items[0].comments()[0].GetText(), aComment)        
         
         
 if __name__ == "__main__":

@@ -14,14 +14,13 @@ class JiraTrackerItem(TrackerItem):
         '''
         Constructor
         '''
+        super(JiraTrackerItem, self).__init__()
         self.piecesToUpdate_ = []
         self._addTicket(ticket)
         self.withDescription(self.ticket_.description())
         self.withSummary(self.ticket_.summary())
         self.piecesToUpdate_ = []
-        self.newComments_ = []
-        self.exisitingComments_ = []
-        
+       
         
     def _addTicket(self, ticket):
         if ticket is None:
@@ -49,33 +48,15 @@ class JiraTrackerItem(TrackerItem):
     
     def asRemoteItem(self):
         return self.underlying().asDictionary() 
-
     
     def Id(self):
         return self.underlying().Id()
-
     
     def piecesToUpdate(self):
         return self.piecesToUpdate_
 
     
-    def addComment(self, newComment):
-        if isinstance(newComment,str):
-            self.newComments_.append(newComment)
-            return
-        self.exisitingComments_.append(newComment)
-        
-    
-    def comments(self):
-        return self.exisitingComments_
 
-    
-    def newComments(self):
-        return self.newComments_
-
-    def withNewComments(self, commentsToCopy):
-        self.newComments_ = commentsToCopy
-        return self
     
     
     

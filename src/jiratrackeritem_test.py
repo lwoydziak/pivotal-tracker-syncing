@@ -93,7 +93,7 @@ class JiraTrackerItem_Test(unittest.TestCase):
         item = JiraTrackerItem()
         commentsToCopy = ["comment1", "comment2"]
         item.withNewComments(commentsToCopy)
-        self.assertEqual(item.newComments(), commentsToCopy)
+        self.assertEqual(item.newComments(), commentsToCopy) 
         
 
 if __name__ == "__main__":

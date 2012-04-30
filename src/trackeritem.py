@@ -12,8 +12,10 @@ class TrackerItem(object):
         '''
         Constructor
         '''
-        self.withSummary(None)
-        self.withDescription(None)
+        self.summary_ = None
+        self.description_ = None
+        self.newComments_ = []
+        self.exisitingComments_ = []
         
     def withSummary(self, summary):
         self.summary_ = summary
@@ -36,5 +38,21 @@ class TrackerItem(object):
         self.withDescription(item.description())
         self.withSummary(item.summary())
         pass
+    
+    def addComment(self, newComment):
+        if isinstance(newComment,str):
+            self.newComments_.append(newComment)
+            return
+        self.exisitingComments_.append(newComment)
+        
+    def comments(self):
+        return self.exisitingComments_
+    
+    def newComments(self):
+        return self.newComments_
+
+    def withNewComments(self, commentsToCopy):
+        self.newComments_ = commentsToCopy
+        return self
 
         

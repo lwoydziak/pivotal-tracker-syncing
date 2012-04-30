@@ -48,6 +48,12 @@ class Tracker(object):
         self.apiObject_ = apiObject
  
     def items(self):
+        items = self._getItems()
+        for index, item in enumerate(items):
+            items[index] = self.updateItemWithComments(item)
+        return items
+    
+    def _getItems(self):
         return []
 
     def update(self, item):

@@ -42,12 +42,6 @@ class JiraTracker(Tracker):
     def location(self):
         return self.url_
     
-    def items(self):
-        items = self._getItems()
-        for index, item in enumerate(items):
-            items[index] = self.updateItemWithComments(item)
-        return items
-    
     def _getItems(self):
         issues = []
         try:

@@ -15,6 +15,7 @@ class PivotalTrackerItem(TrackerItem):
         '''
         Constructor
         '''
+        super(PivotalTrackerItem, self).__init__()
         self.story_ = story
         self.withSummary(self.story_.GetName())
         self.withDescription(self.story_.GetDescription())
