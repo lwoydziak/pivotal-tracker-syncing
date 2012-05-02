@@ -65,4 +65,6 @@ done
 #        fi
 #done
 
+./dependencies2.x.sh
+
 

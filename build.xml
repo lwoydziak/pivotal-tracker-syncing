@@ -66,6 +66,34 @@
 	  </fileset>
 	</apply>
   </target>
+	
+  <target name="duplication" depends="init">
+  	
+  	<path id="clonedigger.files">
+		<fileset dir="${src.dir}">
+			<patternset>
+				<include name="**/*.py"/>	
+				<exclude name="*pytracker*"/>	
+			</patternset>
+		</fileset>  	
+		<fileset dir="${test.dir}">
+			<patternset>
+				<include name="**/*.py"/>	
+				<exclude name="*config*"/>	
+			</patternset>
+		</fileset>
+  	</path>
+    <pathconvert pathsep=" " property="clonediggerfiles" refid="clonedigger.files"/>
+  	<echo file="${filelist.file}" message="${clonediggerfiles}"/>
+  	
+	<exec executable="clonedigger" failonerror="true">
+	  <arg value="--distance-threshold=1"/>	
+	  <arg value="--file-list=${filelist.file}" />
+	</exec>
+  	<exec executable="rm">
+  		<arg value="${filelist.file}"/>
+  	</exec>  	
+  </target>
   
   <target name="test-coverage" depends="init,clean,test,coverage" />
 

@@ -77,7 +77,7 @@ class JiraTracker_Test(unittest.TestCase):
         jiraInstance = self.getMockFor(jira)
         jira.selectProject(["",""])
         fault = Holder()
-        fault.faultstring = "ignore this"
+        fault.faultstring = ""
         when(jiraInstance.service).getIssuesFromJqlSearch(any(), any(), any()).thenRaise(WebFault(fault, None))
         bugs = jira._getItems()
         self.assertEqual(len(bugs), 0)
