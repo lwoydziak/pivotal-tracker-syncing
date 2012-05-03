@@ -89,10 +89,20 @@
 	<exec executable="clonedigger" failonerror="true">
 	  <arg value="--distance-threshold=1"/>	
 	  <arg value="--file-list=${filelist.file}" />
+	  <arg value="--output=with_duplicate_analysis.html" />
 	</exec>
   	<exec executable="rm">
   		<arg value="${filelist.file}"/>
-  	</exec>  	
+  	</exec>
+  	<exec executable="python3.2" failonerror="true">
+  		<arg value="ensure_passing.py" />
+  		<arg value="--build_step=duplication" />
+  		<arg value="with_duplicate_analysis.html"/>
+  	</exec>
+  	<exec executable="rm">
+  		<arg value="with_duplicate_analysis.html"/>
+  	</exec>
+  	  	
   </target>
   
   <target name="test-coverage" depends="init,clean,test,coverage" />
