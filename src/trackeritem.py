@@ -36,9 +36,14 @@ class TrackerItem(object):
     def syncWith(self, item):
         self.withDescription(item.description())
         self.withSummary(item.summary())
+        self.withComments(item.comments())
         pass
     
     def addComment(self, comment, kind='new'):
+        existingComments = self.comments_['existing']
+        newComments = self.comments_['new']
+        if comment in existingComments or comment in newComments:
+            return
         self.comments_[kind].append(comment)
         
     def comments(self, kind='existing'):

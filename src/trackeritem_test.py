@@ -62,8 +62,29 @@ class TrackerItemTests(unittest.TestCase):
         item = TrackerItem()
         commentsToCopy = ["comment1", "comment2"]
         item.withComments(commentsToCopy)
-        self.assertEqual(item.comments('new'), commentsToCopy) 
+        self.assertEqual(item.comments('new'), commentsToCopy)
         
+    def test_duplicateCommentIsNotAdded(self):
+        item = TrackerItem()
+        comment1 = "Don't duplicate me"
+        item.addComment(comment1, 'existing')
+        item.addComment(comment1, 'existing')
+        item.addComment(comment1, 'new')
+        self.assertEqual(len(item.comments('new')), 0)
+        self.assertEqual(len(item.comments('existing')), 1)
+        
+    def test_canSyncCommentsWithItem(self):
+        commentsToSync = ["check for this"]
+        commentsSeed = ["existing comment"]
+        itemTarget = TrackerItem().withComments(commentsSeed, 'existing')
+        itemSource = TrackerItem().withComments(commentsToSync, 'existing')
+        itemTarget.syncWith(itemSource)
+        self.assertEqual(len(itemTarget.comments('existing')), 1)
+        self.assertEqual(len(itemTarget.comments('new')), 1)
+        self.assertEqual(itemTarget.comments('new'), commentsToSync)
+        
+        
+                
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
