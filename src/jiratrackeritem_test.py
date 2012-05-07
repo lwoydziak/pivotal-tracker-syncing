@@ -74,7 +74,7 @@ class JiraTrackerItem_Test(unittest.TestCase):
         item = JiraTrackerItem(testIssue)
         newComment = "Comments work now"
         item.addComment(newComment)
-        comments = item.newComments()
+        comments = item.comments('new')
         existingComments = item.comments()
         self.assertEqual(comments[0], newComment)
         self.assertEqual(existingComments, [])
@@ -83,8 +83,8 @@ class JiraTrackerItem_Test(unittest.TestCase):
         testIssue = RemoteIssue()
         item = JiraTrackerItem(testIssue)
         existingComment = {'created':datetime.now(), 'author':"lwoydziak", 'body':"Comment 1"}
-        item.addComment(existingComment)
-        comments = item.newComments()
+        item.addComment(existingComment, "existing")
+        comments = item.comments('new')
         existingComments = item.comments()
         self.assertEqual(comments, [])
         self.assertEqual(existingComments[0], existingComment)
@@ -92,8 +92,8 @@ class JiraTrackerItem_Test(unittest.TestCase):
     def test_canCopyNewComments(self):
         item = JiraTrackerItem()
         commentsToCopy = ["comment1", "comment2"]
-        item.withNewComments(commentsToCopy)
-        self.assertEqual(item.newComments(), commentsToCopy) 
+        item.withComments(commentsToCopy)
+        self.assertEqual(item.comments('new'), commentsToCopy) 
         
 
 if __name__ == "__main__":

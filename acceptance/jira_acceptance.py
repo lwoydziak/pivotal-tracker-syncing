@@ -80,7 +80,7 @@ class JiraAccpetanceTest(unittest.TestCase):
         tracker.update(item)
         aComment = Testing.addCommentToItemIn(tracker)
         items = tracker.items()
-        self.assertEqual(items[0].comments()[0]['body'], aComment)
+        self.assertEqual(items[0].comments()[0], aComment)
         
         
 if __name__ == "__main__":

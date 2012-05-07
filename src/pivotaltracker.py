@@ -53,7 +53,7 @@ class PivotalTrackerFor(Tracker):
             story = self.trackerInstance_.AddNewStory(item.underlying())
         else:
             story = self.trackerInstance_.UpdateStory(item.underlying())
-        updatedItem = PivotalTrackerItem(story).withNewComments(item.newComments())
+        updatedItem = PivotalTrackerItem(story).withComments(item.comments('new'))
         self.updateCommentsFor(updatedItem)        
         
     def _deleteById(self, itemId):
@@ -71,5 +71,5 @@ class PivotalTrackerFor(Tracker):
         return item
     
     def updateCommentsFor(self, item):
-        for comment in item.newComments():
+        for comment in item.comments('new'):
             self.trackerInstance_.AddComment(item.Id(), comment)

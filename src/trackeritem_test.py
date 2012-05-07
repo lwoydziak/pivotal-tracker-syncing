@@ -50,19 +50,19 @@ class TrackerItemTests(unittest.TestCase):
         newComment = "new Comment"
         item = TrackerItem()
         item.addComment(newComment)
-        self.assertEqual(item.newComments()[0], newComment)
+        self.assertEqual(item.comments('new')[0], newComment)
         
     def test_canAddExistingComment(self):
         existingComment = {'id':1, 'text':"existing comment"}
         item = TrackerItem()
-        item.addComment(existingComment)
+        item.addComment(existingComment, "existing")
         self.assertEqual(item.comments()[0], existingComment)
     
     def test_canCopyNewComments(self):
         item = TrackerItem()
         commentsToCopy = ["comment1", "comment2"]
-        item.withNewComments(commentsToCopy)
-        self.assertEqual(item.newComments(), commentsToCopy) 
+        item.withComments(commentsToCopy)
+        self.assertEqual(item.comments('new'), commentsToCopy) 
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

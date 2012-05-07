@@ -88,7 +88,7 @@ class PivotalTrackerTest(unittest.TestCase):
         when(pivotalTrackerItem).underlying().thenReturn(story)
         when(pivotalTrackerItem).Id().thenReturn(None)
         when(trackerInstance).AddNewStory(any()).thenReturn(mock())
-        when(pivotalTrackerItem).newComments().thenReturn([])
+        when(pivotalTrackerItem).comments('new').thenReturn([])
         tracker.update(pivotalTrackerItem)
         verify(trackerInstance).AddNewStory(story)
         pass
@@ -143,7 +143,7 @@ class PivotalTrackerTest(unittest.TestCase):
         when(pivotalTrackerItem).underlying().thenReturn(story)
         when(pivotalTrackerItem).Id().thenReturn(storyId)
         when(trackerInstance).AddNewStory(any()).thenReturn(mock())
-        when(pivotalTrackerItem).newComments().thenReturn([])
+        when(pivotalTrackerItem).comments('new').thenReturn([])
         when(trackerInstance).UpdateStory(any()).thenReturn(mock())
         tracker.update(pivotalTrackerItem)
         verify(trackerInstance).UpdateStory(story)

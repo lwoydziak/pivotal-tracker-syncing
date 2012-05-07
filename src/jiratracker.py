@@ -62,7 +62,7 @@ class JiraTracker(Tracker):
             issue = self.trackerInstance_.createIssue(self.authentication_, item.asRemoteItem())
         else:
             issue = self.trackerInstance_.updateIssue(self.authentication_, item.Id(), item.piecesToUpdate())
-        updatedItem = JiraTrackerItem(issue).withNewComments(item.newComments())
+        updatedItem = JiraTrackerItem(issue).withComments(item.comments('new'))
         self.updateCommentsFor(updatedItem)
     
     def _deleteById(self, itemId):
@@ -75,11 +75,11 @@ class JiraTracker(Tracker):
     def updateItemWithComments(self, item):
         comments = self.trackerInstance_.getComments(self.authentication_, item.Id())
         for comment in comments:
-            item.addComment(comment)
+            item.addComment(comment['body'], 'existing')
         return item
 
     def updateCommentsFor(self, item):
-        for comment in item.newComments():
+        for comment in item.comments('new'):
             self.trackerInstance_.addComment(self.authentication_, item.Id(), {"body":comment})
     
     

@@ -97,7 +97,7 @@ class JiraTracker_Test(unittest.TestCase):
         values = {"one" : 1, "two":2}
         when(trackerItem).Id().thenReturn(None)
         when(trackerItem).asRemoteItem().thenReturn(values)
-        when(trackerItem).newComments().thenReturn([])
+        when(trackerItem).comments('new').thenReturn([])
         jira.update(trackerItem)
         verify(jiraInstance.service).createIssue(self.auth_, values)
         pass    
@@ -157,7 +157,7 @@ class JiraTracker_Test(unittest.TestCase):
         key = "12345"
         when(trackerItem).Id().thenReturn(key)
         when(trackerItem).piecesToUpdate().thenReturn(values)
-        when(trackerItem).newComments().thenReturn([])
+        when(trackerItem).comments('new').thenReturn([])
         jira.update(trackerItem) 
         verify(jiraInstance.service).updateIssue(self.auth_, key, values)
         pass
@@ -167,12 +167,14 @@ class JiraTracker_Test(unittest.TestCase):
         jiraInstance = self.getMockFor(jira)
         ticket = mock()
         key = "12345"
-        twoComments = [{'created':datetime.now(), 'author':"lwoydziak", 'body':"Comment 1"}, {'created':datetime.now(), 'author':"lwoydziak", 'body':"Comment 1"}]
+        twoComments = [{'created':datetime.now(), 'author':"lwoydziak", 'body':"Comment 1"}, {'created':datetime.now(), 'author':"lwoydziak", 'body':"Comment 2"}]
         when(ticket).Id().thenReturn(key)
         when(jiraInstance.service).getComments(any(),any()).thenReturn(twoComments)
         jira.updateItemWithComments(ticket)
         verify(jiraInstance.service).getComments(self.auth_, key)
-        verify(ticket, times=2).addComment(any())
+        inorder.verify(ticket).Id()
+        inorder.verify(ticket).addComment(twoComments[0]['body'], 'existing')
+        inorder.verify(ticket).addComment(twoComments[1]['body'], 'existing')
         pass
     
     def itemWithComments(self, testing):
