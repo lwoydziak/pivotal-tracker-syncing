@@ -6,6 +6,7 @@ Created on Mar 29, 2012
 import unittest
 import sys
 from config import Env
+from acceptance_test_support import Testing
 from jiraitemfactory import jiraItemFactory
 sys.path.insert(0, "src")
 from jiratracker import JiraTracker
@@ -58,9 +59,9 @@ class JiraAccpetanceTest(unittest.TestCase):
         
     def test_canRemoveAllStoriesFromJira(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canRemoveAllStoriesFromPivotal-1", "can delete this?")
+        item = jiraItemFactory(Env().jiraProject, "test_canRemoveAllStoriesFromJira-1", "can delete this?")
         tracker.update(item)
-        item.withSummary("test_canRemoveAllStoriesFromPivotal-2")
+        item.withSummary("test_canRemoveAllStoriesFromJira-2")
         tracker.update(item)
         tracker.deleteAllItems()
         stories = tracker.items()
@@ -70,23 +71,14 @@ class JiraAccpetanceTest(unittest.TestCase):
         tracker = self.jira_
         item = jiraItemFactory(Env().jiraProject, "test_canUpdateItemAlreadyInJira-1", "can update this?")
         tracker.update(item)
-        items = tracker.items()
-        newSummary = "test_canUpdateItemAlreadyInJira-1"
-        newDescription = "yep - updated"
-        items[0].withSummary(newSummary).withDescription(newDescription)
-        tracker.update(items[0])
-        items = tracker.items()
-        self.assertEqual(items[0].summary(), newSummary)
-        self.assertEqual(items[0].description(), newDescription)
+        Testing.canUpdateItemsIn(tracker, self)
+        
     
     def test_canAddCommentsToTicket(self):
         tracker = self.jira_
         item = jiraItemFactory(Env().jiraProject, "test_canAddCommentsToTicket-1", "can comment on this?")
         tracker.update(item)
-        items = tracker.items()
-        aComment = "I am adding this comment"
-        items[0].addComment(aComment)
-        tracker.update(items[0])
+        aComment = Testing.addCommentToItemIn(tracker)
         items = tracker.items()
         self.assertEqual(items[0].comments()[0]['body'], aComment)
         

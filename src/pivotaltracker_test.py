@@ -13,6 +13,7 @@ from mockito.verification import never
 from datetime import datetime
 from pivotaltrackeritem import PivotalTrackerItem
 from mockito import inorder
+from unit_test_support import Testing
 
 
 class PivotalTrackerTest(unittest.TestCase):
@@ -52,12 +53,8 @@ class PivotalTrackerTest(unittest.TestCase):
         verify(pivotalApiObject).Tracker(any(), authentication)
         
     def test_canGetStoriesFromProject(self):
-        tracker = self.makeTestTracker()
-        pivotalApiObject = self.apiObject_
-        trackerInstance = mock()
-        when(pivotalApiObject).Tracker(any(),any()).thenReturn(trackerInstance)
-        pivotalProjectNumber = 0
-        tracker.selectProject(pivotalProjectNumber)
+        tracker = self.makeValidTracker()
+        trackerInstance = self.trackerInstance_
         when(trackerInstance).GetStories().thenReturn([Story(),Story()])
         when(trackerInstance).GetComments(any()).thenReturn([])
         items = tracker.items()
@@ -153,12 +150,8 @@ class PivotalTrackerTest(unittest.TestCase):
         pass
     
     def test_retryWhenTryingToGetStoriesAndException(self):
-        tracker = self.makeTestTracker()
-        pivotalApiObject = self.apiObject_
-        trackerInstance = mock()
-        when(pivotalApiObject).Tracker(any(),any()).thenReturn(trackerInstance)
-        pivotalProjectNumber = 0
-        tracker.selectProject(pivotalProjectNumber)
+        tracker = self.makeValidTracker()
+        trackerInstance = self.trackerInstance_
         when(trackerInstance).GetStories().thenRaise(Exception("")).thenReturn([Story(),Story()])
         when(trackerInstance).GetComments(any()).thenReturn([])
         tracker.items()
@@ -177,32 +170,27 @@ class PivotalTrackerTest(unittest.TestCase):
         verify(story, times=2).addComment(any())
         pass
     
+    def itemWithComments(self, testing):
+        issue = Story()
+        issue.story_id = "1234"
+        return testing.itemWithCommentsOfType(PivotalTrackerItem, issue)
+        
     def test_canAddCommentsToStoryTicket(self):
         tracker = self.makeValidTracker()
         trackerInstance = self.trackerInstance_
-        comment1 = "comment1"
-        comment2 = "comment2"
-        issue = Story()
-        issue.story_id = "1234"
-        item = PivotalTrackerItem(issue)
-        item.addComment(comment1)
-        item.addComment(comment2)
+        testing = Testing()
+        item = self.itemWithComments(testing)
         tracker.updateCommentsFor(item)
-        inorder.verify(trackerInstance).AddComment(issue.GetStoryId(), comment1)
-        inorder.verify(trackerInstance).AddComment(issue.GetStoryId(), comment2)
+        inorder.verify(trackerInstance).AddComment(testing.issue.GetStoryId(), testing.comment1)
+        inorder.verify(trackerInstance).AddComment(testing.issue.GetStoryId(), testing.comment2)
         pass
     
     def test_updateAddsNewComments(self):
         tracker = self.makeValidTracker()
         trackerInstance = self.trackerInstance_
-        comment1 = "comment1"
-        comment2 = "comment2"
-        issue = Story()
-        issue.story_id = "1234"
         updatedStory = mock()
-        item = PivotalTrackerItem(issue)
-        item.addComment(comment1)
-        item.addComment(comment2)
+        testing = Testing()
+        item = self.itemWithComments(testing)
         when(trackerInstance).UpdateStory(any()).thenReturn(updatedStory)
         when(updatedStory).GetName().thenReturn("")
         tracker.update(item)
@@ -218,7 +206,7 @@ class PivotalTrackerTest(unittest.TestCase):
         story2.story_id = 1235
         when(trackerInstance).GetStories().thenReturn([story1,story2])
         when(trackerInstance).GetComments(any()).thenReturn([])
-        items = tracker.items()
+        tracker.items()
         inorder.verify(trackerInstance).GetStories()
         inorder.verify(trackerInstance).GetComments(story1.GetStoryId())
         inorder.verify(trackerInstance).GetComments(story2.GetStoryId())

@@ -14,6 +14,7 @@ from mockito.verification import never
 from datetime import datetime
 from jiratrackeritem import JiraTrackerItem
 from mockito import inorder
+from unit_test_support import Testing
 
 class Holder(object):
     pass
@@ -174,32 +175,27 @@ class JiraTracker_Test(unittest.TestCase):
         verify(ticket, times=2).addComment(any())
         pass
     
+    def itemWithComments(self, testing):
+        issue = RemoteIssue()
+        issue.key = 1234
+        return testing.itemWithCommentsOfType(JiraTrackerItem, issue)
+    
     def test_canAddCommentsToTicket(self):
         jira = JiraTracker()
         jiraInstance = self.getMockFor(jira)
-        comment1 = "comment1"
-        comment2 = "comment2"
-        issue = RemoteIssue()
-        issue.key = "1234"
-        item = JiraTrackerItem(issue)
-        item.addComment(comment1)
-        item.addComment(comment2)
+        testing = Testing()
+        item = self.itemWithComments(testing)
         jira.updateCommentsFor(item)
         inorder.verify(jiraInstance.service).login(any(),any())
-        inorder.verify(jiraInstance.service).addComment(self.auth_, issue.key, {"body":comment1})
-        inorder.verify(jiraInstance.service).addComment(self.auth_, issue.key, {"body":comment2})
+        inorder.verify(jiraInstance.service).addComment(self.auth_, testing.issue.key, {"body":testing.comment1})
+        inorder.verify(jiraInstance.service).addComment(self.auth_, testing.issue.key, {"body":testing.comment2})
         pass
     
     def test_updateAddsNewComments(self):
         jira = JiraTracker()
         jiraInstance = self.getMockFor(jira)
-        comment1 = "comment1"
-        comment2 = "comment2"
-        issue = RemoteIssue()
-        issue.key = "1234"
-        item = JiraTrackerItem(issue)
-        item.addComment(comment1)
-        item.addComment(comment2)
+        testing = Testing()
+        item = self.itemWithComments(testing)
         jira.update(item)
         verify(jiraInstance.service, times=2).addComment(any(), any(), any())
         pass

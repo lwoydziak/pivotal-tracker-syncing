@@ -6,9 +6,11 @@ Created on Mar 29, 2012
 import unittest
 import sys
 from config import Env
+from acceptance_test_support import Testing
 sys.path.insert(0, "src")
 from pivotaltrackeritem import PivotalTrackerItem
 from pivotaltracker import PivotalTrackerFor
+
 
 
 class PivotalAcceptanceTest(unittest.TestCase):
@@ -91,12 +93,9 @@ class PivotalAcceptanceTest(unittest.TestCase):
         tracker = self.pivotal_
         item = PivotalTrackerItem().withSummary("test_canAddCommentsToStory").withDescription("description")
         tracker.update(item)
+        aComment = Testing.addCommentToItemIn(tracker)
         items = tracker.items()
-        aComment = "I am adding this comment"
-        items[0].addComment(aComment)
-        tracker.update(items[0])
-        items = tracker.items()
-        self.assertEqual(items[0].comments()[0].GetText(), aComment)        
+        self.assertEqual(items[0].comments()[0].GetText(), aComment)  
         
         
 if __name__ == "__main__":
