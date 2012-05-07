@@ -8,7 +8,7 @@ from pivotaltracker import PivotalTrackerFor
 from mockito.mockito import verify, when
 from mockito.mocking import mock
 from mockito.matchers import any
-from pytracker import Story
+from pytracker import Story, Comment
 from mockito.verification import never
 from datetime import datetime
 from pivotaltrackeritem import PivotalTrackerItem
@@ -162,12 +162,18 @@ class PivotalTrackerTest(unittest.TestCase):
         trackerInstance = self.trackerInstance_
         story = mock()
         storyId = "12345"
-        twoComments = [{'id': 1234, 'noted_at':datetime.now(), 'author':"lwoydziak", 'text':"Comment 1"}, {'id': 1234, 'noted_at':datetime.now(), 'author':"lwoydziak", 'text':"Comment2"}]
+        comment1 = Comment()
+        comment1.text = "Comment 1"
+        comment2 = Comment()
+        comment2.text = "Comment 2"
+        twoComments = [comment1, comment2]
         when(story).Id().thenReturn(storyId)
         when(trackerInstance).GetComments(any()).thenReturn(twoComments)
         tracker.updateItemWithComments(story)
         verify(trackerInstance).GetComments(storyId)
-        verify(story, times=2).addComment(any())
+        inorder.verify(story).Id()
+        inorder.verify(story).addComment(twoComments[0].GetText(), 'existing')
+        inorder.verify(story).addComment(twoComments[1].GetText(), 'existing')
         pass
     
     def itemWithComments(self, testing):

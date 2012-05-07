@@ -67,7 +67,7 @@ class PivotalTrackerFor(Tracker):
     def updateItemWithComments(self, item):
         comments = self.trackerInstance_.GetComments(item.Id())
         for comment in comments:
-            item.addComment(comment)
+            item.addComment(comment.GetText(), 'existing')
         return item
     
     def updateCommentsFor(self, item):
