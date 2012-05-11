@@ -30,17 +30,21 @@ class PivotalTrackerItem(TrackerItem):
         if matches is not None:
             match1 = matches.group(2)
             match2 = matches.group(1)
-        return match1, match2 
+        return match1, match2
             
     def _normalizeSummary(self, summary):
         summary, jiraKey  = self._returnRegexMatch('\[(.*)\]: (.+)', str(summary)) #regex to match everything after [<other tracker id>]:
-        self.withSummary(summary)
-        self.withJiraKey(jiraKey)
+        if summary is not None:
+            self.withSummary(summary)
+        if jiraKey is not None:
+            self.withJiraKey(jiraKey)
         
     def _normalizeDescription(self, description):
         description, jiraUrl = self._returnRegexMatch('(https://.+)[\n|\r](.*)', str(description)) #regex to match everything after https://<stuff>\n
-        self.withDescription(description)
-        self.withJiraUrl(jiraUrl)
+        if description is not None:
+            self.withDescription(description)
+        if jiraUrl is not None:
+            self.withJiraUrl(jiraUrl)
         
     def underlying(self):
         return self.story_

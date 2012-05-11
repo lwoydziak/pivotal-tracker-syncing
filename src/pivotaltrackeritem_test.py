@@ -119,9 +119,18 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
         self.assertEqual(item.description(), description)
         self.assertEqual(item.jiraUrl(), jiraUrl)
         
+    def test_previouslyExistingJiraInformationIsNotOverwritternBecauseDecoratedStoryDoesNotYetContainIt(self):
+        story = Story()
+        jiraId = "blah"
+        jiraUrl = "blah2"
+        story.jira_id = jiraId
+        story.jira_url = jiraUrl
+        story.SetName("name")
+        story.SetDescription("description")
+        item = PivotalTrackerItem(story)
+        self.assertEqual(item.jiraKey(), jiraId)
+        self.assertEqual(item.jiraUrl(), jiraUrl)
         
-
-
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
