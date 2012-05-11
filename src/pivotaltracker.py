@@ -50,9 +50,9 @@ class PivotalTrackerFor(Tracker):
     def update(self, item):
         super(PivotalTrackerFor, self).update(item)
         if (item.Id() is None):
-            story = self.trackerInstance_.AddNewStory(item.underlying())
+            story = self.trackerInstance_.AddNewStory(item.decoratedStory())
         else:
-            story = self.trackerInstance_.UpdateStory(item.underlying())
+            story = self.trackerInstance_.UpdateStory(item.decoratedStory())
         updatedItem = PivotalTrackerItem(story).withComments(item.comments('new'))
         self.updateCommentsFor(updatedItem)        
         

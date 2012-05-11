@@ -6,6 +6,7 @@ Created on Mar 27, 2012
 import suds
 from tracker import Tracker
 from jiratrackeritem import JiraTrackerItem
+from urllib.parse import urlparse
 
 NAME = 0
 JQL = 1
@@ -82,6 +83,11 @@ class JiraTracker(Tracker):
         for comment in item.comments('new'):
             self.trackerInstance_.addComment(self.authentication_, item.Id(), {"body":comment})
     
+    def _setExtraFieldsFor(self, item):
+        item = super(JiraTracker, self)._setExtraFieldsFor(item)
+        parsedUrl = urlparse(self.location())
+        item.withJiraUrl("https://" + str(parsedUrl.netloc) + "/browse/" + str(item.jiraKey()))
+        return item
     
     
     

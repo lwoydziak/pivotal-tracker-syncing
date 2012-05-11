@@ -202,6 +202,19 @@ class JiraTracker_Test(unittest.TestCase):
         verify(jiraInstance.service, times=2).addComment(any(), any(), any())
         pass
     
+    def test_jiraItemsAreReturnedWithUrlPopulated(self):
+        jira = JiraTracker()
+        jiraInstance = self.getMockFor(jira)
+        url = "http://www.jira.com/garbage/not/to/be/included/"
+        jira.setLocationTo(url)
+        item = RemoteIssue()
+        item.key = "TEST-jt12345"
+        when(jiraInstance.service).getIssuesFromJqlSearch(any(), any(), any()).thenReturn([item])
+        when(jiraInstance.service).getComments(any(),any()).thenReturn([])
+        items = jira.items()
+        self.assertEqual(items[0].jiraUrl(), "https://www.jira.com/browse/TEST-jt12345")
+        
+    
 
 
 if __name__ == "__main__":

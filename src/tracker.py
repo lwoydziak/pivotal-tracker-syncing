@@ -48,10 +48,13 @@ class Tracker(object):
         self.apiObject_ = apiObject
  
     def items(self):
-        items = self._getItems()
-        for index, item in enumerate(items):
-            items[index] = self.updateItemWithComments(item)
-        return items
+        itemsToReturn = self._getItems()
+        for index, item in enumerate(itemsToReturn):
+            itemsToReturn[index] = self._setExtraFieldsFor(item)
+        return itemsToReturn
+    
+    def _setExtraFieldsFor(self, item):
+        return self.updateItemWithComments(item)
     
     def _getItems(self):
         return []

@@ -44,6 +44,13 @@ class SyncAcceptanceTest(unittest.TestCase):
         pivotal.update(newPivotalItem)
         pass
     
+    def syncExistingItemFromJiraToPivotal(self, newJiraItem, jira, pivotal):
+        jira.update(newJiraItem)
+        jiraItems = jira.items()
+        pivotalItems = pivotal.items()
+        pivotalItems[0].syncWith(jiraItems[0])
+        pivotal.update(pivotalItems[0])
+    
     def test_existingIssueInJiraIsSyncedWithExistingIssueInPivotal(self):
         jira = self.jira_
         pivotal = self.pivotal_
@@ -52,11 +59,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         desiredSummary = "test_existingIssueInJiraIsSyncedWithExistingIssueInPivotal"
         desiredDescription = "Overwritten!"
         newJiraItem = jiraItemFactory(Env().jiraProject, desiredSummary, desiredDescription )
-        jira.update(newJiraItem)
-        jiraItems = jira.items()
-        pivotalItems = pivotal.items()
-        pivotalItems[0].syncWith(jiraItems[0])
-        pivotal.update(pivotalItems[0])
+        self.syncExistingItemFromJiraToPivotal(newJiraItem, jira, pivotal)
         updatedPivotalItems = pivotal.items()
         self.assertEqual(updatedPivotalItems[0].summary(), desiredSummary)
         self.assertEqual(updatedPivotalItems[0].description(), desiredDescription)
@@ -70,11 +73,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         newJiraItem = jiraItemFactory(Env().jiraProject, "to test comments", "blah")
         commentOnJira = "this commentOnJira can be synced"
         newJiraItem.addComment(commentOnJira)
-        jira.update(newJiraItem)
-        jiraItems = jira.items()
-        pivotalItems = pivotal.items()
-        pivotalItems[0].syncWith(jiraItems[0])
-        pivotal.update(pivotalItems[0])
+        self.syncExistingItemFromJiraToPivotal(newJiraItem, jira, pivotal)
         updatedPivotalItems = pivotal.items()
         self.assertEqual(updatedPivotalItems[0].comments()[0], commentOnJira)
         pass
@@ -96,7 +95,17 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.assertEqual(updatedJiraItems[0].comments()[0], commentOnPivotal)
         pass
     
-
+    def test_issueInJiraAndInPivotalAreSyncable(self):
+        jira = self.jira_
+        pivotal = self.pivotal_
+        newJiraItem = jiraItemFactory(Env().jiraProject, "test_issueInJiraAndInPivotalAreEqual", "A test description")
+        newPivotalItem = PivotalTrackerItem().withSummary("test_issueInJiraAndInPivotalAreEqual-2").withDescription("description")
+        pivotal.update(newPivotalItem)
+        self.syncExistingItemFromJiraToPivotal(newJiraItem, jira, pivotal)
+        jiraItems = jira.items()
+        pivotalItems = pivotal.items()
+        self.assertTrue(pivotalItems[0].canBeSyncedWith(jiraItems[0]))
+        pass
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

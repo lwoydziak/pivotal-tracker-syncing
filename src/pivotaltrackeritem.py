@@ -5,6 +5,8 @@ Created on Apr 7, 2012
 '''
 from trackeritem import TrackerItem
 from pytracker import Story
+from copy import deepcopy
+import re
 
 class PivotalTrackerItem(TrackerItem):
     '''
@@ -17,9 +19,29 @@ class PivotalTrackerItem(TrackerItem):
         '''
         super(PivotalTrackerItem, self).__init__()
         self.story_ = story
-        self.withSummary(self.story_.GetName())
-        self.withDescription(self.story_.GetDescription())
-    
+        self._normalizeSummary(self.story_.GetName())
+        self._normalizeDescription(self.story_.GetDescription())
+        
+    def _returnRegexMatch(self, regex, subject):    
+        match1 = subject
+        match2 = None
+        regex = re.compile(regex) 
+        matches = regex.match(subject)
+        if matches is not None:
+            match1 = matches.group(2)
+            match2 = matches.group(1)
+        return match1, match2 
+            
+    def _normalizeSummary(self, summary):
+        summary, jiraKey  = self._returnRegexMatch('\[(.*)\]: (.+)', str(summary)) #regex to match everything after [<other tracker id>]:
+        self.withSummary(summary)
+        self.withJiraKey(jiraKey)
+        
+    def _normalizeDescription(self, description):
+        description, jiraUrl = self._returnRegexMatch('(https://.+)[\n|\r](.*)', str(description)) #regex to match everything after https://<stuff>\n
+        self.withDescription(description)
+        self.withJiraUrl(jiraUrl)
+        
     def underlying(self):
         return self.story_
     
@@ -36,34 +58,31 @@ class PivotalTrackerItem(TrackerItem):
     def Id(self):
         return self.underlying().GetStoryId()
 
-    
-    def withJiraUrl(self, updateUrl):
-        self.story_.SetJiraUrl(updateUrl)
+    def withJiraUrl(self, jiraUrl):
+        self.story_.SetJiraUrl(jiraUrl)
         return self
     
     def jiraUrl(self):
         return self.underlying().GetJiraUrl()
-
     
-    def withJiraKey(self, updateJiraId):
-        self.story_.SetJiraKey(updateJiraId)
+    def withJiraKey(self, jiraKey):
+        self.story_.SetJiraKey(jiraKey)
         return self
     
     def jiraKey(self):
-        return self.underlying().GetJiraKey()
-    
-    
+        return self.underlying().GetJiraKey()    
+
+    def canBeSyncedWith(self, toSyncWith):
+        return toSyncWith.canBeSyncedWith(self)
 
     
-    
-    
-    
-    
-    
-    
-    
-
-
+    def decoratedStory(self):
+        story = deepcopy(self.underlying())
+        if self.jiraKey() is not None:
+            story.SetName("[" + str(self.jiraKey()) + "]: " + str(self.summary()))
+        if self.jiraUrl() is not None:
+            story.SetDescription(str(self.jiraUrl()) + "\n" + str(self.description()))
+        return story
     
     
     

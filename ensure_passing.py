@@ -20,7 +20,7 @@ def failed(message):
     return 1
 
 def duplication(inputfile, requirement):
-    regex = re.compile('.*Clones detected:(.[0-9]+)')
+    regex = re.compile('.*Clones detected:(.[0-9]+)') # regex to matches the numbers after "Clones detected:"
     for _, line in enumerate(inputfile, start=1):
         matches = regex.match(line)
         if matches is None:

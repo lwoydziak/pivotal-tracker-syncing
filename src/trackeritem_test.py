@@ -5,6 +5,8 @@ Created on Apr 7, 2012
 '''
 import unittest
 from trackeritem import TrackerItem
+from mockito.mocking import mock
+from mockito.mockito import verify, when
 
 class TrackerItemTests(unittest.TestCase):
     def test_canConstructTestItem(self):
@@ -82,6 +84,21 @@ class TrackerItemTests(unittest.TestCase):
         self.assertEqual(len(itemTarget.comments('existing')), 1)
         self.assertEqual(len(itemTarget.comments('new')), 1)
         self.assertEqual(itemTarget.comments('new'), commentsToSync)
+        
+    def test_syncItemSpecificData(self):
+        otherItem = mock()
+        thisItem = TrackerItem()
+        when(otherItem).comments().thenReturn([])
+        thisItem.syncWith(otherItem)
+        verify(otherItem).copyTypeSpecificDataTo(thisItem)
+        
+    def test_noSpecificItemDataIsCopiedForBaseType(self):
+        startingItem = TrackerItem()
+        endingItem = startingItem
+        itemToCopySpecificDataFrom = TrackerItem()
+        itemToCopySpecificDataFrom.copyTypeSpecificDataTo(endingItem)
+        self.assertEqual(startingItem, endingItem)
+        
         
         
                 

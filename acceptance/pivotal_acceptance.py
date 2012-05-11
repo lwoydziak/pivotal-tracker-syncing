@@ -77,10 +77,10 @@ class PivotalAcceptanceTest(unittest.TestCase):
     @unittest.expectedFailure
     def test_canAddAndUpdateJiraLinksToPivotalStories(self):
         tracker = self.pivotal_
-        newUrl = "https://www.jira.com/TEST-1234"
-        jiraTicketKey = "TEST-1234"
+        newUrl = "https://www.jira.com/TEST-pa1234"
+        jiraTicketKey = "TEST-pa1234"
         item = PivotalTrackerItem().withSummary("test_canAddAndUpdateJiraLinksToPivotalStories").withDescription("description")
-        item.withJiraUrl("http://www.jira.com/TEST-1234").withJiraKey(jiraTicketKey)
+        item.withJiraUrl("http://www.jira.com/TEST-pa1234").withJiraKey(jiraTicketKey)
         tracker.update(item)
         items = tracker.items()
         items[0].withJiraUrl(newUrl)

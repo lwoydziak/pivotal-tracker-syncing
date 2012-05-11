@@ -85,7 +85,7 @@ class PivotalTrackerTest(unittest.TestCase):
         trackerInstance = self.trackerInstance_
         pivotalTrackerItem = mock()
         story = mock()
-        when(pivotalTrackerItem).underlying().thenReturn(story)
+        when(pivotalTrackerItem).decoratedStory().thenReturn(story)
         when(pivotalTrackerItem).Id().thenReturn(None)
         when(trackerInstance).AddNewStory(any()).thenReturn(mock())
         when(pivotalTrackerItem).comments('new').thenReturn([])
@@ -140,7 +140,7 @@ class PivotalTrackerTest(unittest.TestCase):
         pivotalTrackerItem = mock()
         story = mock()
         storyId = 12345
-        when(pivotalTrackerItem).underlying().thenReturn(story)
+        when(pivotalTrackerItem).decoratedStory().thenReturn(story)
         when(pivotalTrackerItem).Id().thenReturn(storyId)
         when(trackerInstance).AddNewStory(any()).thenReturn(mock())
         when(pivotalTrackerItem).comments('new').thenReturn([])

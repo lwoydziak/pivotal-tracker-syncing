@@ -37,6 +37,7 @@ class TrackerItem(object):
         self.withDescription(item.description())
         self.withSummary(item.summary())
         self.withComments(item.comments())
+        item.copyTypeSpecificDataTo(self)
         pass
     
     def addComment(self, comment, kind='new'):
@@ -53,5 +54,10 @@ class TrackerItem(object):
         for comment in commentsToCopy:
             self.addComment(comment, kind)
         return self
+    
+    def copyTypeSpecificDataTo(self, item):
+        pass
+    
+    
 
         

@@ -55,19 +55,21 @@ class JiraTrackerItem(TrackerItem):
     def piecesToUpdate(self):
         return self.piecesToUpdate_
 
+    def withJiraUrl(self, updateUrl):
+        self.url_ = updateUrl
     
+    def jiraUrl(self):
+        return self.url_
 
+    def jiraKey(self):
+        return self.Id()
     
+    def copyTypeSpecificDataTo(self, item):
+        super(JiraTrackerItem, self).copyTypeSpecificDataTo(item)
+        item.withJiraKey(self.jiraKey())
+        item.withJiraUrl(self.jiraUrl())
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    def canBeSyncedWith(self, toSyncWith):
+        return toSyncWith.jiraKey() == self.jiraKey()
     
     
