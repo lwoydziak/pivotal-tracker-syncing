@@ -59,7 +59,8 @@ class JiraTracker_Test(unittest.TestCase):
         jira = JiraTracker()
         jiraInstance = self.getMockFor(jira)
         when(jiraInstance.service).getIssuesFromJqlSearch(any(), any(), any()).thenReturn([])
-        jira._getItems()
+        itemIterator = jira._getItems()
+        self.assertRaises(StopIteration, next, itemIterator)
         verify(jiraInstance.service).getIssuesFromJqlSearch(self.auth_, any(), any())
         pass
 
@@ -69,9 +70,11 @@ class JiraTracker_Test(unittest.TestCase):
         project = ["test","JQL here"]
         jira.selectProject(project)
         when(jiraInstance.service).getIssuesFromJqlSearch(any(), project[1], any()).thenReturn([RemoteIssue(),RemoteIssue(),RemoteIssue()])
-        bugs = jira._getItems()
-        self.assertEqual(len(bugs), 3)
-        pass
+        itemIterator = jira._getItems() 
+        next(itemIterator)
+        next(itemIterator)
+        next(itemIterator)
+        self.assertRaises(StopIteration, next, itemIterator)
     
     def test_canntGetBugsForProject(self):
         jira = JiraTracker()
@@ -80,8 +83,7 @@ class JiraTracker_Test(unittest.TestCase):
         fault = Holder()
         fault.faultstring = ""
         when(jiraInstance.service).getIssuesFromJqlSearch(any(), any(), any()).thenRaise(WebFault(fault, None))
-        bugs = jira._getItems()
-        self.assertEqual(len(bugs), 0)
+        self.assertRaises(StopIteration, next, jira._getItems())
     
     def test_finalizeLogsout(self):
         jira = JiraTracker()
@@ -211,8 +213,7 @@ class JiraTracker_Test(unittest.TestCase):
         item.key = "TEST-jt12345"
         when(jiraInstance.service).getIssuesFromJqlSearch(any(), any(), any()).thenReturn([item])
         when(jiraInstance.service).getComments(any(),any()).thenReturn([])
-        items = jira.items()
-        self.assertEqual(items[0].jiraUrl(), "https://www.jira.com/browse/TEST-jt12345")
+        self.assertEqual(next(jira.items()).jiraUrl(), "https://www.jira.com/browse/TEST-jt12345")
         
     
 

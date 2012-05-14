@@ -131,6 +131,10 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
         self.assertEqual(item.jiraKey(), jiraId)
         self.assertEqual(item.jiraUrl(), jiraUrl)
         
+    def test_cannotSyncWithNoItem(self):
+        item = PivotalTrackerItem()
+        self.assertFalse(item.canBeSyncedWith(None))
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

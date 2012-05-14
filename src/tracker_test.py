@@ -9,7 +9,7 @@ from mockito.mocking import mock
 from mockito.mockito import verify
 
 
-class Test(unittest.TestCase):
+class TrackerTest(unittest.TestCase):
     def test_canSetLoginUsername(self):
         user = "lukewoydziak"
         tracker = Tracker()
@@ -41,8 +41,7 @@ class Test(unittest.TestCase):
         
     def test_itemsReturnsNone(self):
         tracker = Tracker()
-        items = tracker.items()
-        self.assertEqual(len(items), 0)
+        self.assertRaises(StopIteration, next, tracker.items())
     
     def test_cantUpdateIfNotValid(self):
         tracker = Tracker()
@@ -64,20 +63,13 @@ class Test(unittest.TestCase):
     def test_canDeleteAllItems(self):
         tracker = Tracker()
         tracker.deleteAllItems()
-        self.assertEqual(len(tracker.items()), 0)
+        self.assertRaises(StopIteration, next, tracker.items())
     
     def test_canConvertItemToType(self):
         tracker = Tracker()
         contents = mock()
         item = tracker._convertToItem(testType, contents)
         self.assertEqual(item.contains(), contents)
-        
-    def test_canConvertToItemsOfType(self):
-        tracker = Tracker()
-        contents1 = mock()
-        contents2 = mock()        
-        items = tracker._convertToItems(testType, [contents1, contents2])
-        self.assertEqual(items[1].contains(), contents2)
 
 class testType(object):
     def __init__(self, item):

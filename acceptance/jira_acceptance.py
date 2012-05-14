@@ -34,8 +34,7 @@ class JiraAccpetanceTest(unittest.TestCase):
         tracker = self.jira_
         item = jiraItemFactory(Env().jiraProject, "test_canDeleteJiraIssue", "A test description")
         tracker.update(item)
-        items = tracker.items()
-        tracker.delete(items[0])
+        tracker.delete(next(tracker.items()))
         
     def test_canDownloadStoriesFromJira(self):
         tracker = self.jira_
@@ -43,9 +42,10 @@ class JiraAccpetanceTest(unittest.TestCase):
         tracker.update(item)
         item.withSummary("test_canDownloadStoriesFromJira-2")
         tracker.update(item)
-        stories = tracker.items()
-        self.assertEqual(len(stories), 2)
-        pass
+        storiesIterator = tracker.items()
+        next(storiesIterator)
+        next(storiesIterator)
+        self.assertRaises(StopIteration, next, storiesIterator)
     
     def test_canAddStoryStoryToJira(self):
         tracker = self.jira_
@@ -53,9 +53,9 @@ class JiraAccpetanceTest(unittest.TestCase):
         description = "this is a test"
         item = jiraItemFactory(Env().jiraProject, name, description)
         tracker.update(item)
-        stories = tracker.items()
-        self.assertEqual(stories[0].summary(), name)
-        self.assertEqual(stories[0].description(), description)
+        story = next(tracker.items())
+        self.assertEqual(story.summary(), name)
+        self.assertEqual(story.description(), description)
         
     def test_canRemoveAllStoriesFromJira(self):
         tracker = self.jira_
@@ -64,8 +64,7 @@ class JiraAccpetanceTest(unittest.TestCase):
         item.withSummary("test_canRemoveAllStoriesFromJira-2")
         tracker.update(item)
         tracker.deleteAllItems()
-        stories = tracker.items()
-        self.assertEqual(len(stories), 0)
+        self.assertRaises(StopIteration, next, tracker.items())
         
     def test_canUpdateItemAlreadyInJira(self):
         tracker = self.jira_
@@ -79,8 +78,8 @@ class JiraAccpetanceTest(unittest.TestCase):
         item = jiraItemFactory(Env().jiraProject, "test_canAddCommentsToTicket-1", "can comment on this?")
         tracker.update(item)
         aComment = Testing.addCommentToItemIn(tracker)
-        items = tracker.items()
-        self.assertEqual(items[0].comments()[0], aComment)
+        item = next(tracker.items())
+        self.assertEqual(item.comments()[0], aComment)
         
         
 if __name__ == "__main__":

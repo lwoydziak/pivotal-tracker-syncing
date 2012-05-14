@@ -49,8 +49,8 @@ class JiraTracker(Tracker):
             issues = self.trackerInstance_.getIssuesFromJqlSearch(self.authentication_, self.project_[JQL], 4000)
         except Exception as e:
             print (e.fault.faultstring)
-        return self._issuesToItems(issues)
-
+        for issue in issues:
+            yield self._convertToItem(JiraTrackerItem, issue)
     
     def finalize(self):
         self.trackerInstance_.logout(self.authentication_)
@@ -69,10 +69,7 @@ class JiraTracker(Tracker):
     def _deleteById(self, itemId):
         self.trackerInstance_.deleteIssue(self.authentication_, itemId)
         pass
-    
-    def _issuesToItems(self, issues):
-        return self._convertToItems(JiraTrackerItem, issues)
-    
+        
     def updateItemWithComments(self, item):
         comments = self.trackerInstance_.getComments(self.authentication_, item.Id())
         for comment in comments:

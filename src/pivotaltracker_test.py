@@ -57,8 +57,10 @@ class PivotalTrackerTest(unittest.TestCase):
         trackerInstance = self.trackerInstance_
         when(trackerInstance).GetStories().thenReturn([Story(),Story()])
         when(trackerInstance).GetComments(any()).thenReturn([])
-        items = tracker.items()
-        self.assertEqual(len(items), 2)
+        itemIterator = tracker.items()
+        next(itemIterator)
+        next(itemIterator)
+        self.assertRaises(StopIteration, next, itemIterator)
         
     def test_trackerValidAfterLogin(self):
         tracker = self.makeTestTracker()
@@ -154,7 +156,7 @@ class PivotalTrackerTest(unittest.TestCase):
         trackerInstance = self.trackerInstance_
         when(trackerInstance).GetStories().thenRaise(Exception("")).thenReturn([Story(),Story()])
         when(trackerInstance).GetComments(any()).thenReturn([])
-        tracker.items()
+        next(tracker.items())
         verify(trackerInstance, times=2).GetStories()
         
     def test_canGetCommentsForTicket(self):
@@ -212,7 +214,9 @@ class PivotalTrackerTest(unittest.TestCase):
         story2.story_id = 1235
         when(trackerInstance).GetStories().thenReturn([story1,story2])
         when(trackerInstance).GetComments(any()).thenReturn([])
-        tracker.items()
+        itemIterator = tracker.items()
+        next(itemIterator)
+        next(itemIterator)
         inorder.verify(trackerInstance).GetStories()
         inorder.verify(trackerInstance).GetComments(story1.GetStoryId())
         inorder.verify(trackerInstance).GetComments(story2.GetStoryId())

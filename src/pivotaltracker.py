@@ -37,7 +37,8 @@ class PivotalTrackerFor(Tracker):
             if stories is not "garbage":
                 break
             times = times-1
-        return self._storiesToItems(stories)
+        for story in stories:
+            yield self._convertToItem(PivotalTrackerItem, story)
     
     def _tryToGetStories(self):
         try: 
@@ -60,9 +61,6 @@ class PivotalTrackerFor(Tracker):
         if itemId is None:
             return
         self.trackerInstance_.DeleteStory(itemId)
-        
-    def _storiesToItems(self, stories):
-        return self._convertToItems(PivotalTrackerItem, stories)
     
     def updateItemWithComments(self, item):
         comments = self.trackerInstance_.GetComments(item.Id())

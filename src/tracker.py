@@ -48,16 +48,15 @@ class Tracker(object):
         self.apiObject_ = apiObject
  
     def items(self):
-        itemsToReturn = self._getItems()
-        for index, item in enumerate(itemsToReturn):
-            itemsToReturn[index] = self._setExtraFieldsFor(item)
-        return itemsToReturn
+        for item in self._getItems():
+            yield self._setExtraFieldsFor(item)
     
     def _setExtraFieldsFor(self, item):
         return self.updateItemWithComments(item)
     
     def _getItems(self):
-        return []
+        if False:
+            yield None #empty generator
 
     def update(self, item):
         if not self.valid(): 
@@ -69,8 +68,7 @@ class Tracker(object):
         self._deleteById(item.Id())
         
     def deleteAllItems(self):
-        items = self.items()
-        for item in items:
+        for item in self.items():
             self._deleteById(item.Id())
 
     def _deleteById(self, itemId):
@@ -78,12 +76,6 @@ class Tracker(object):
  
     def _convertToItem(self, typeName, contents):
         return typeName(contents)
-      
-    def _convertToItems(self, typeName, listOfItemContents):
-        for index, contentsForItem in enumerate(listOfItemContents):
-            listOfItemContents[index] = self._convertToItem(typeName, contentsForItem)
-        return listOfItemContents    
-        
     
     
     

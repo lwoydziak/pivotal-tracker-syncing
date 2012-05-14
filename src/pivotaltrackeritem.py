@@ -77,6 +77,8 @@ class PivotalTrackerItem(TrackerItem):
         return self.underlying().GetJiraKey()    
 
     def canBeSyncedWith(self, toSyncWith):
+        if toSyncWith is None:
+            return False
         return toSyncWith.canBeSyncedWith(self)
 
     

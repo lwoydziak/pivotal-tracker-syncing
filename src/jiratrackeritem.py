@@ -70,6 +70,8 @@ class JiraTrackerItem(TrackerItem):
         item.withJiraUrl(self.jiraUrl())
     
     def canBeSyncedWith(self, toSyncWith):
+        if toSyncWith is None:
+            return False
         return toSyncWith.jiraKey() == self.jiraKey()
     
     

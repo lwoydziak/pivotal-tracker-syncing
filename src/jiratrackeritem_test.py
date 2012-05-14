@@ -130,6 +130,10 @@ class JiraTrackerItem_Test(unittest.TestCase):
         toSyncWith = mock()
         when(toSyncWith).jiraKey().thenReturn("blah")
         self.assertFalse(item.canBeSyncedWith(toSyncWith))
+        
+    def test_cannotSyncWithNoItem(self):
+        item = JiraTrackerItem()
+        self.assertFalse(item.canBeSyncedWith(None))
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
