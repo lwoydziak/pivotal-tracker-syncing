@@ -43,6 +43,12 @@ class RemoteIssue(object):
     updated = None
     votes = 0
     
+class RemoteStatus(object):
+    description = None
+    icon = None
+    id = 0
+    name = None
+    
     
     
     
