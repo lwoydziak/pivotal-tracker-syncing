@@ -6,7 +6,7 @@ Created on Apr 10, 2012
 import unittest
 from jiratrackeritem import JiraTrackerItem
 from jiraticket import JiraTicket
-from remoteissue import RemoteIssue
+from jiraremotestructures import RemoteIssue
 from datetime import datetime
 from mockito.mockito import verify, when
 from mockito.mocking import mock

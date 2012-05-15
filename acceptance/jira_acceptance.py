@@ -10,6 +10,7 @@ from acceptance_test_support import Testing
 from jiraitemfactory import jiraItemFactory
 sys.path.insert(0, "src")
 from jiratracker import JiraTracker
+from mappivotaltojirastatus import PivotalToJiraStatusMap
 
 
 class JiraAccpetanceTest(unittest.TestCase):
@@ -81,7 +82,24 @@ class JiraAccpetanceTest(unittest.TestCase):
         item = next(tracker.items())
         self.assertEqual(item.comments()[0], aComment)
         
+    def test_canGetAvailableStatusesForJira(self):
+        tracker = self.jira_
+        statuses = tracker.getAvailableStatuses()
+        PivotalToJiraStatusMap().addMapping(jira="Closed", pivotal="Accepted")
+        PivotalToJiraStatusMap().insert(statuses)
+        self.assertEqual(len(PivotalToJiraStatusMap()), 1)
         
+#    def test_canAdjustStateOfTicket(self):
+#        tracker = self.jira_
+#        item = jiraItemFactory(Env().jiraProject, "test_canAdjustStateOfTicket-1", "can comment on this?")
+#        tracker.update(item)
+#        item = next(tracker.items())
+#        status = InTest()
+#        item.withStatus(status)
+#        tracker.update(item)
+#        item = next(tracker.items())
+#        self.assertEqual(item.status(), status)
+       
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_canConnectToPivotalTrackerTestProject']
     unittest.main()

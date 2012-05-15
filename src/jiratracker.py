@@ -86,5 +86,10 @@ class JiraTracker(Tracker):
         item.withJiraUrl("https://" + str(parsedUrl.netloc) + "/browse/" + str(item.jiraKey()))
         return item
     
+    def getAvailableStatuses(self):
+        return self.trackerInstance_.getStatuses(self.authentication_)
+    
+    
+    
     
     

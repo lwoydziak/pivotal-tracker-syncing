@@ -3,7 +3,7 @@ Created on Apr 10, 2012
 
 @author: lwoydziak
 '''
-from remoteissue import RemoteIssue
+from jiraremotestructures import RemoteIssue
 
 class JiraTicket(object):
     '''

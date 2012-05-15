@@ -5,7 +5,7 @@ Created on Apr 10, 2012
 '''
 import unittest
 from jiraticket import JiraTicket
-from remoteissue import RemoteIssue, RemoteComponent, RemoteCustomFieldValue,\
+from jiraremotestructures import RemoteIssue, RemoteComponent, RemoteCustomFieldValue,\
     RemoteVersion
 from datetime import datetime
 

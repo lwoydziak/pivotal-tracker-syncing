@@ -9,7 +9,7 @@ from mockito.mocking import mock
 from mockito.mockito import verify, when
 from mockito.matchers import any
 from suds import WebFault
-from remoteissue import RemoteIssue
+from jiraremotestructures import RemoteIssue
 from mockito.verification import never
 from datetime import datetime
 from jiratrackeritem import JiraTrackerItem
@@ -215,8 +215,11 @@ class JiraTracker_Test(unittest.TestCase):
         when(jiraInstance.service).getComments(any(),any()).thenReturn([])
         self.assertEqual(next(jira.items()).jiraUrl(), "https://www.jira.com/browse/TEST-jt12345")
         
-    
-
+    def test_canGetAvailableStatuses(self):
+        jira = JiraTracker()
+        jiraInstance = self.getMockFor(jira)
+        jira.getAvailableStatuses()
+        verify(jiraInstance.service).getStatuses(self.auth_)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
