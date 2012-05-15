@@ -20,4 +20,11 @@ class Testing(object):
         self.comment1 = comment1
         self.comment2 = comment2
         return item
+    
+    @staticmethod
+    def stringOfAsOfSize(size):
+        stringToReturn = ""
+        for _ in range(1, size):
+            stringToReturn += "a"
+        return stringToReturn
         

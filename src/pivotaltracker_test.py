@@ -221,6 +221,15 @@ class PivotalTrackerTest(unittest.TestCase):
         inorder.verify(trackerInstance).GetComments(story1.GetStoryId())
         inorder.verify(trackerInstance).GetComments(story2.GetStoryId())
         
+    def test_doNotAddCommentsGreaterThan20000Characters(self):
+        tracker = self.makeValidTracker()
+        trackerInstance = self.trackerInstance_
+        testing = Testing()
+        item = self.itemWithComments(testing)
+        item.addComment(Testing.stringOfAsOfSize(20002))
+        tracker.updateCommentsFor(item)
+        verify(trackerInstance, times=2).AddComment(any(), any())
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

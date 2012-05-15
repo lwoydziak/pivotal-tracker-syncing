@@ -11,7 +11,7 @@ class PivotalTrackerFor(Tracker):
     '''
     classdocs
     '''
-
+    MAX_COMMENT_LENGTH = 20001
 
     def __init__(self, projectNumber):
         '''
@@ -70,4 +70,5 @@ class PivotalTrackerFor(Tracker):
     
     def updateCommentsFor(self, item):
         for comment in item.comments('new'):
-            self.trackerInstance_.AddComment(item.Id(), comment)
+            if len(comment) < self.MAX_COMMENT_LENGTH:
+                self.trackerInstance_.AddComment(item.Id(), comment)
