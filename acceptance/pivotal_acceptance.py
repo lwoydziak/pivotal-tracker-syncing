@@ -6,7 +6,7 @@ Created on Mar 29, 2012
 import unittest
 import sys
 from config import Env
-from acceptance_test_support import Testing
+from acceptance_test_support import Testing, SinglePivotal
 import time
 sys.path.insert(0, "src")
 from pivotaltrackeritem import PivotalTrackerItem
@@ -18,9 +18,7 @@ from pytracker import Story
 class PivotalAcceptanceTest(unittest.TestCase):
     def setUp(self):
         unittest.TestCase.setUp(self)
-        tracker = PivotalTrackerFor(Env().pivotalTrackerProject)
-        tracker.loginAs(Env().pivotalTrackerUsername).withCredential(Env().pivotalTrackerPassword)
-        self.pivotal_ = tracker
+        self.pivotal_ = SinglePivotal().instance()
         pass
     
     def tearDown(self):

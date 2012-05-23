@@ -6,7 +6,7 @@ Created on Mar 29, 2012
 import unittest
 import sys
 from config import Env
-from acceptance_test_support import Testing
+from acceptance_test_support import Testing, SingleJira
 from jiraitemfactory import jiraItemFactory
 sys.path.insert(0, "src")
 from jiratracker import JiraTracker
@@ -17,15 +17,11 @@ from trackeritemstatus import TrackerItemStatus
 class JiraAccpetanceTest(unittest.TestCase):
     def setUp(self):
         unittest.TestCase.setUp(self)
-        tracker = JiraTracker(Env().jiraUrl)
-        tracker.loginAs(Env().jiraUsername).withCredential(Env().jiraPassword)
-        tracker.selectProject([Env().jiraProject, Env().jiraJql])
-        self.jira_ = tracker
+        self.jira_ = SingleJira().instance()
         pass
     
     def tearDown(self):
         self.jira_.deleteAllItems()
-        self.jira_.finalize()
         unittest.TestCase.tearDown(self)
     
     def test_canConnectToJira(self):

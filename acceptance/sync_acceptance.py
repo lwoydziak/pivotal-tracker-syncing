@@ -6,6 +6,7 @@ Created on Apr 18, 2012
 import unittest
 import sys
 from config import Env
+from acceptance_test_support import SingleJira, SinglePivotal
 sys.path.insert(0, "src")
 from jiratracker import JiraTracker
 from pivotaltracker import PivotalTrackerFor
@@ -18,19 +19,12 @@ from unit_test_support import Testing
 class SyncAcceptanceTest(unittest.TestCase):
     def setUp(self):
         unittest.TestCase.setUp(self)
-        jira = JiraTracker(Env().jiraUrl)
-        jira.loginAs(Env().jiraUsername).withCredential(Env().jiraPassword)
-        jira.selectProject([Env().jiraProject, Env().jiraJql])
-        self.jira_ = jira
-        pivotal = PivotalTrackerFor(Env().pivotalTrackerProject)
-        pivotal.loginAs(Env().pivotalTrackerUsername).withCredential(Env().pivotalTrackerPassword)
-        self.pivotal_ = pivotal
+        self.jira_ = SingleJira().instance()
+        self.pivotal_ = SinglePivotal().instance()
         pass
-
 
     def tearDown(self):
         self.jira_.deleteAllItems()
-        self.jira_.finalize()
         self.pivotal_.deleteAllItems()
         unittest.TestCase.tearDown(self)
 
