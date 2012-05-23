@@ -55,7 +55,7 @@ class PivotalTrackerTest(unittest.TestCase):
     def test_canGetStoriesFromProject(self):
         tracker = self.makeValidTracker()
         trackerInstance = self.trackerInstance_
-        when(trackerInstance).GetStories().thenReturn([Story(),Story()])
+        when(trackerInstance).GetStories(any()).thenReturn([Story(),Story()])
         when(trackerInstance).GetComments(any()).thenReturn([])
         itemIterator = tracker.items()
         next(itemIterator)
@@ -121,7 +121,7 @@ class PivotalTrackerTest(unittest.TestCase):
         item1.story_id = 1234
         item2 = Story()
         item2.story_id = 12345
-        when(trackerInstance).GetStories().thenReturn([item1,item2])
+        when(trackerInstance).GetStories(any()).thenReturn([item1,item2])
         when(trackerInstance).GetComments(any()).thenReturn([])
         tracker.deleteAllItems()
         verify(trackerInstance).DeleteStory(item1.story_id)
@@ -131,7 +131,7 @@ class PivotalTrackerTest(unittest.TestCase):
     def test_noDeletionsWhenNoItems(self):
         tracker = self.makeValidTracker()
         trackerInstance = self.trackerInstance_
-        when(trackerInstance).GetStories().thenReturn([])
+        when(trackerInstance).GetStories(any()).thenReturn([])
         tracker.deleteAllItems()
         verify(trackerInstance, never).DeleteStory(any())
         pass
@@ -154,10 +154,10 @@ class PivotalTrackerTest(unittest.TestCase):
     def test_retryWhenTryingToGetStoriesAndException(self):
         tracker = self.makeValidTracker()
         trackerInstance = self.trackerInstance_
-        when(trackerInstance).GetStories().thenRaise(Exception("")).thenReturn([Story(),Story()])
+        when(trackerInstance).GetStories(any()).thenRaise(Exception("")).thenReturn([Story(),Story()])
         when(trackerInstance).GetComments(any()).thenReturn([])
         next(tracker.items())
-        verify(trackerInstance, times=2).GetStories()
+        verify(trackerInstance, times=2).GetStories(any())
         
     def test_canGetCommentsForTicket(self):
         tracker = self.makeValidTracker()
@@ -171,7 +171,7 @@ class PivotalTrackerTest(unittest.TestCase):
         twoComments = [comment1, comment2]
         when(story).Id().thenReturn(storyId)
         when(trackerInstance).GetComments(any()).thenReturn(twoComments)
-        tracker.updateItemWithComments(story)
+        tracker.addCommentsTo(story)
         verify(trackerInstance).GetComments(storyId)
         inorder.verify(story).Id()
         inorder.verify(story).addComment(twoComments[0].GetText(), 'existing')
@@ -212,12 +212,12 @@ class PivotalTrackerTest(unittest.TestCase):
         story1.story_id = 1234
         story2 = Story()
         story2.story_id = 1235
-        when(trackerInstance).GetStories().thenReturn([story1,story2])
+        when(trackerInstance).GetStories(any()).thenReturn([story1,story2])
         when(trackerInstance).GetComments(any()).thenReturn([])
         itemIterator = tracker.items()
         next(itemIterator)
         next(itemIterator)
-        inorder.verify(trackerInstance).GetStories()
+        inorder.verify(trackerInstance).GetStories(any())
         inorder.verify(trackerInstance).GetComments(story1.GetStoryId())
         inorder.verify(trackerInstance).GetComments(story2.GetStoryId())
         
@@ -229,6 +229,15 @@ class PivotalTrackerTest(unittest.TestCase):
         item.addComment(Testing.stringOfAsOfSize(20002))
         tracker.updateCommentsFor(item)
         verify(trackerInstance, times=2).AddComment(any(), any())
+        
+    def test_filterIsSentWhenSpecified(self):
+        tracker = self.makeValidTracker()
+        trackerInstance = self.trackerInstance_
+        forFilter = "blah"
+        when(trackerInstance).GetStories(any()).thenReturn([])
+        when(trackerInstance).GetComments(any()).thenReturn([])
+        self.assertRaises(StopIteration, next, tracker.items(forFilter)) 
+        verify(trackerInstance).GetStories(forFilter)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

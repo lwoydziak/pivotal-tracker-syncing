@@ -43,6 +43,13 @@ class JiraTicket_Test(unittest.TestCase):
         ticket = JiraTicket(testTicket)
         self.assertEqual(ticket.Id(),testTicket.key)
         pass
+    
+    def test_canSetStatus(self):
+        testTicket = testRemoteIssueFactory()
+        ticket = JiraTicket(testTicket)
+        statusId = 6
+        ticket.setStatus(statusId)
+        self.assertEqual(ticket.status(), statusId)
 
 def testRemoteIssueFactory():
     testRemoteVersion = RemoteVersion()

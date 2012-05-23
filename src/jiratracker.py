@@ -43,10 +43,18 @@ class JiraTracker(Tracker):
     def location(self):
         return self.url_
     
-    def _getItems(self):
+    def _makeJqlQuery(self, forFilter=None):
+        if forFilter is None:
+            return self.project()[JQL]
+        if self.project()[JQL] is None or self.project()[JQL] is "":
+            return forFilter
+        return self.project()[JQL] + " and " + forFilter
+    
+    def _getItems(self, forFilter=None):
         issues = []
+        jqlQuery = self._makeJqlQuery(forFilter)
         try:
-            issues = self.trackerInstance_.getIssuesFromJqlSearch(self.authentication_, self.project_[JQL], 4000)
+            issues = self.trackerInstance_.getIssuesFromJqlSearch(self.authentication_, jqlQuery, 4000)
         except Exception as e:
             print (e.fault.faultstring)
         for issue in issues:
@@ -63,14 +71,18 @@ class JiraTracker(Tracker):
             issue = self.trackerInstance_.createIssue(self.authentication_, item.asRemoteItem())
         else:
             issue = self.trackerInstance_.updateIssue(self.authentication_, item.Id(), item.piecesToUpdate())
-        updatedItem = JiraTrackerItem(issue).withComments(item.comments('new'))
+        updatedItem = JiraTrackerItem(issue)
+#        if "status" in str(item.piecesToUpdate()):
+#            updatedItem.withStatus(item.status())
+#            updatedItem = JiraTrackerItem(self._issueWithUpdatedStatusFrom(updatedItem))
+        updatedItem.withComments(item.comments('new'))
         self.updateCommentsFor(updatedItem)
     
     def _deleteById(self, itemId):
         self.trackerInstance_.deleteIssue(self.authentication_, itemId)
         pass
         
-    def updateItemWithComments(self, item):
+    def addCommentsTo(self, item):
         comments = self.trackerInstance_.getComments(self.authentication_, item.Id())
         for comment in comments:
             item.addComment(comment['body'], 'existing')
@@ -88,6 +100,11 @@ class JiraTracker(Tracker):
     
     def getAvailableStatuses(self):
         return self.trackerInstance_.getStatuses(self.authentication_)
+
+    
+#    def _issueWithUpdatedStatusFrom(self, trackerItem):
+#        actions = self.trackerInstance_.getAvailableActions(self.authentication_, trackerItem.Id())
+#        return self.trackerInstance_.progressWorkflowAction(self.authentication_, trackerItem.Id(), trackerItem.status().jira(), [])
     
     
     

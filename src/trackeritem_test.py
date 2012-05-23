@@ -7,6 +7,7 @@ import unittest
 from trackeritem import TrackerItem
 from mockito.mocking import mock
 from mockito.mockito import verify, when
+from trackeritemstatus import TrackerItemStatus
 
 class TrackerItemTests(unittest.TestCase):
     def test_canConstructTestItem(self):
@@ -99,7 +100,11 @@ class TrackerItemTests(unittest.TestCase):
         itemToCopySpecificDataFrom.copyTypeSpecificDataTo(endingItem)
         self.assertEqual(startingItem, endingItem)
         
-        
+    def test_canAddStatus(self):
+        item = TrackerItem()
+        status = TrackerItemStatus()
+        item.withStatus(status)
+        self.assertEqual(item.status(), status)
         
                 
 if __name__ == "__main__":

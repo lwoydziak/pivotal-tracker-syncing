@@ -17,8 +17,7 @@ class PivotalToJiraStatusMap(object, metaclass=Singleton):
         
     def reset(self):
         self.mappings_ = {}
-        self.jiraToPivotalMap_ = {}
-        self.pivotalToJiraMap_ = {}        
+        self.maps_ = {'jira': {}, 'pivotal' : {}}
          
     def addMapping(self, jira, pivotal):
         self.mappings_[jira] = pivotal
@@ -28,8 +27,8 @@ class PivotalToJiraStatusMap(object, metaclass=Singleton):
             self.mappings_[jiraStatus.name]
         except KeyError:
             return
-        self.pivotalToJiraMap_[self.mappings_[jiraStatus.name]] = jiraStatus.id
-        self.jiraToPivotalMap_[jiraStatus.id] = self.mappings_[jiraStatus.name]
+        self.maps_['jira'][self.mappings_[jiraStatus.name]] = jiraStatus.id
+        self.maps_['pivotal'][jiraStatus.id] = self.mappings_[jiraStatus.name]
     
     def insert(self, jiraStatus):
         if isinstance(jiraStatus, list):
@@ -38,11 +37,8 @@ class PivotalToJiraStatusMap(object, metaclass=Singleton):
             return
         self._insert(jiraStatus)
         
-    def getPivotalStatusFor(self, jiraStatusId):
-        return self.jiraToPivotalMap_[jiraStatusId]
-    
-    def getJiraStatusFor(self, pivotalStatus):
-        return self.pivotalToJiraMap_[pivotalStatus]
+    def translateStatusTo(self, kind, statusToTranslate):
+        return self.maps_[kind][statusToTranslate]
     
     def __len__(self):
-        return len(self.pivotalToJiraMap_)
+        return len(self.maps_['pivotal'])

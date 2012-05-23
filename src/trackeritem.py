@@ -58,6 +58,13 @@ class TrackerItem(object):
     def copyTypeSpecificDataTo(self, item):
         pass
     
+    def withStatus(self, status):
+        self.status_ = status
+    
+    def status(self):
+        return self.status_
+    
+    
     
 
         

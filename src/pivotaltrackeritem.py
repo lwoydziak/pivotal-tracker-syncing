@@ -6,6 +6,7 @@ Created on Apr 7, 2012
 from trackeritem import TrackerItem
 from pytracker import Story
 from copy import deepcopy
+from defaultparameter import defaultParameter
 import re
 
 class PivotalTrackerItem(TrackerItem):
@@ -13,12 +14,12 @@ class PivotalTrackerItem(TrackerItem):
     classdocs
     '''
 
-    def __init__(self, story=Story() ):
+    def __init__(self, story=None ):
         '''
         Constructor
         '''
         super(PivotalTrackerItem, self).__init__()
-        self.story_ = story
+        self.story_ = defaultParameter(Story, story)
         self._normalizeSummary(self.story_.GetName())
         self._normalizeDescription(self.story_.GetDescription())
         

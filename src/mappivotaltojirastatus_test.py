@@ -23,8 +23,8 @@ class PivotalToJiraStatusMapTest(unittest.TestCase):
         jiraStatus = self.jiraClosedRemoteStatus()
         PivotalToJiraStatusMap().addMapping(jira=jiraStatus.name, pivotal=pivotalClosedStatus)
         PivotalToJiraStatusMap().insert(jiraStatus)
-        self.assertEqual(PivotalToJiraStatusMap().getPivotalStatusFor(jiraStatus.id), pivotalClosedStatus)
-        self.assertEqual(PivotalToJiraStatusMap().getJiraStatusFor(pivotalClosedStatus), jiraStatus.id)
+        self.assertEqual(PivotalToJiraStatusMap().translateStatusTo('pivotal', jiraStatus.id), pivotalClosedStatus)
+        self.assertEqual(PivotalToJiraStatusMap().translateStatusTo('jira', pivotalClosedStatus), jiraStatus.id)
         
     def test_canInsertMultipleJiraStatuses(self):
         PivotalToJiraStatusMap().addMapping(jira="closed", pivotal="Accepted")

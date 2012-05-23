@@ -47,14 +47,14 @@ class Tracker(object):
     def apiObject(self, apiObject):
         self.apiObject_ = apiObject
  
-    def items(self):
-        for item in self._getItems():
+    def items(self, forFilter=None):
+        for item in self._getItems(forFilter):
             yield self._setExtraFieldsFor(item)
     
     def _setExtraFieldsFor(self, item):
-        return self.updateItemWithComments(item)
+        return self.addCommentsTo(item)
     
-    def _getItems(self):
+    def _getItems(self, forFilter=None):
         if False:
             yield None #empty generator
 

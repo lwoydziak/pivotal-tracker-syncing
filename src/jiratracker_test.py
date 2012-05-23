@@ -58,7 +58,7 @@ class JiraTracker_Test(unittest.TestCase):
     def test_authSentWhenGettingBugs(self):
         jira = JiraTracker()
         jiraInstance = self.getMockFor(jira)
-        when(jiraInstance.service).getIssuesFromJqlSearch(any(), any(), any()).thenReturn([])
+        self.setMocksForGettingItems(jiraInstance)
         itemIterator = jira._getItems()
         self.assertRaises(StopIteration, next, itemIterator)
         verify(jiraInstance.service).getIssuesFromJqlSearch(self.auth_, any(), any())
@@ -146,7 +146,7 @@ class JiraTracker_Test(unittest.TestCase):
         jira = JiraTracker()
         jiraInstance = self.getMockFor(jira)
         jira.selectProject(["",""])
-        when(jiraInstance.service).getIssuesFromJqlSearch(any(), any(), any()).thenReturn([])
+        self.setMocksForGettingItems(jiraInstance)
         jira.deleteAllItems()
         verify(jiraInstance.service, never).deleteIssue(any(), any())
         pass
@@ -172,7 +172,7 @@ class JiraTracker_Test(unittest.TestCase):
         twoComments = [{'created':datetime.now(), 'author':"lwoydziak", 'body':"Comment 1"}, {'created':datetime.now(), 'author':"lwoydziak", 'body':"Comment 2"}]
         when(ticket).Id().thenReturn(key)
         when(jiraInstance.service).getComments(any(),any()).thenReturn(twoComments)
-        jira.updateItemWithComments(ticket)
+        jira.addCommentsTo(ticket)
         verify(jiraInstance.service).getComments(self.auth_, key)
         inorder.verify(ticket).Id()
         inorder.verify(ticket).addComment(twoComments[0]['body'], 'existing')
@@ -213,13 +213,62 @@ class JiraTracker_Test(unittest.TestCase):
         item.key = "TEST-jt12345"
         when(jiraInstance.service).getIssuesFromJqlSearch(any(), any(), any()).thenReturn([item])
         when(jiraInstance.service).getComments(any(),any()).thenReturn([])
-        self.assertEqual(next(jira.items()).jiraUrl(), "https://www.jira.com/browse/TEST-jt12345")
+        self.assertEqual(next(jira.items()).jiraUrl(), "https://www.jira.com/browse/TEST-jt12345") 
         
     def test_canGetAvailableStatuses(self):
         jira = JiraTracker()
         jiraInstance = self.getMockFor(jira)
         jira.getAvailableStatuses()
         verify(jiraInstance.service).getStatuses(self.auth_)
+        
+#    def test_canUpdateStatus(self):
+#        jira = JiraTracker()
+#        jiraInstance = self.getMockFor(jira)
+#        statusId = 6
+#        itemId = 1234
+#        trackerItem = mock()
+#        status = mock()
+#        when(trackerItem).Id().thenReturn(itemId)
+#        when(trackerItem).status().thenReturn(status)
+#        when(status).jira().thenReturn(statusId)
+#        jira._issueWithUpdatedStatusFrom(trackerItem)
+#        verify(jiraInstance.service).progressWorkflowAction(self.auth_, itemId, statusId, any())
+#        
+#    
+#    def test_willUpdateStatusBecauseItIsSeperateStepForJira(self):
+#        jira = JiraTracker()
+#        jiraInstance = self.getMockFor(jira)
+#        itemId = 1234
+#        trackerItem = mock()
+#        status = mock()
+#        when(trackerItem).Id().thenReturn(itemId)
+#        when(trackerItem).status().thenReturn(status)
+#        when(trackerItem).piecesToUpdate().thenReturn("status")
+#        when(trackerItem).comments(any()).thenReturn([])
+#        jira.update(trackerItem)
+#        verify(jiraInstance.service).progressWorkflowAction(any(), any(), any(), any())
+        
+    def setMocksForGettingItems(self, jiraInstance):
+        when(jiraInstance.service).getIssuesFromJqlSearch(any(),any(),any()).thenReturn([])
+        when(jiraInstance.service).GetComments(any()).thenReturn([])
+    
+    def test_filterIsSentWhenSpecified(self):
+        jira = JiraTracker()
+        jiraInstance = self.getMockFor(jira)
+        forFilter = "blah"
+        self.setMocksForGettingItems(jiraInstance)
+        self.assertRaises(StopIteration, next, jira._getItems(forFilter)) 
+        verify(jiraInstance.service).getIssuesFromJqlSearch(any(),forFilter,any())
+        
+    def test_filterCombinedWithProjectJqlSentWhenSpecified(self):
+        jira = JiraTracker()
+        jiraInstance = self.getMockFor(jira)
+        forFilter = "blah"
+        jql = "1234" 
+        jira.selectProject(["", jql])
+        self.setMocksForGettingItems(jiraInstance)
+        self.assertRaises(StopIteration, next, jira._getItems(forFilter)) 
+        verify(jiraInstance.service).getIssuesFromJqlSearch(any(),jql + " and " + forFilter,any()) 
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

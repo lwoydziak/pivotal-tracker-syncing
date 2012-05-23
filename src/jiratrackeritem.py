@@ -5,6 +5,8 @@ Created on Apr 10, 2012
 '''
 from trackeritem import TrackerItem
 from jiraticket import JiraTicket
+from trackeritemstatus import TrackerItemStatus
+from defaultparameter import defaultParameter
 
 class JiraTrackerItem(TrackerItem):
     '''
@@ -16,16 +18,14 @@ class JiraTrackerItem(TrackerItem):
         '''
         super(JiraTrackerItem, self).__init__()
         self.piecesToUpdate_ = []
-        self._addTicket(ticket)
+        self._addTicket(defaultParameter(JiraTicket, ticket))
         self.withDescription(self.ticket_.description())
         self.withSummary(self.ticket_.summary())
+        self.withStatus(TrackerItemStatus(self.ticket_))
         self.piecesToUpdate_ = []
        
         
     def _addTicket(self, ticket):
-        if ticket is None:
-            self.ticket_ = JiraTicket()
-            return
         if isinstance(ticket, JiraTicket):
             self.ticket_ = ticket
             return
@@ -73,5 +73,13 @@ class JiraTrackerItem(TrackerItem):
         if toSyncWith is None:
             return False
         return toSyncWith.jiraKey() == self.jiraKey()
+    
+    def withStatus(self, status):
+        super(JiraTrackerItem, self).withStatus(status)
+        self.ticket_.setStatus(status.jira())
+        self.piecesToUpdate_.append({'id':"status", 'values':[status.jira(),]})
+        return self
+    
+    
     
     

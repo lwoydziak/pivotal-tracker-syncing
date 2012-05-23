@@ -7,6 +7,7 @@ import unittest
 import sys
 from config import Env
 from acceptance_test_support import Testing
+import time
 sys.path.insert(0, "src")
 from pivotaltrackeritem import PivotalTrackerItem
 from pivotaltracker import PivotalTrackerFor
@@ -44,9 +45,9 @@ class PivotalAcceptanceTest(unittest.TestCase):
         self.assertRaises(StopIteration, next, itemIterator)
         pass
     
-    def test_canAddStoryStoryToPivotal(self):
+    def test_canAddStoryToPivotal(self):
         tracker = self.pivotal_
-        name = "test_canAddStoryStoryToPivotal"
+        name = "test_canAddStoryToPivotal"
         description = "this is a test"
         item = PivotalTrackerItem(Story()).withSummary(name).withDescription(description)
         tracker.update(item)
@@ -96,7 +97,29 @@ class PivotalAcceptanceTest(unittest.TestCase):
         tracker.update(item)
         aComment = Testing.addCommentToItemIn(tracker)
         item = next(tracker.items())
-        self.assertEqual(item.comments()[0], aComment)  
+        self.assertEqual(item.comments()[0], aComment)
+        
+    def test_canFilterStoriesReturnedFromTrackerSoNoMatchesAreFound(self):
+        tracker = self.pivotal_
+        item = PivotalTrackerItem().withSummary("test_canFilterStoriesReturnedFromTracker").withDescription("description")
+        tracker.update(item)
+        forFilter = "label:garabage"
+        self.assertRaises(StopIteration, next, tracker.items(forFilter))
+        
+    def test_canFilterStoriesReturnedFromTrackerOnlyOneMatchIsFound(self):
+        tracker = self.pivotal_
+        forFilter = "searchForMe"
+        item = PivotalTrackerItem().withSummary(forFilter).withDescription("description")
+        tracker.update(item)
+        item = PivotalTrackerItem().withSummary("test_canFilterStoriesReturnedFromTrackerOnlyOneMatchIsFound").withDescription("description")
+        tracker.update(item)
+        time.sleep(2)
+        itemIterator = tracker.items(forFilter)
+        next(itemIterator)
+        self.assertRaises(StopIteration, next, itemIterator)
+         
+         
+         
         
         
 if __name__ == "__main__":

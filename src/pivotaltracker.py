@@ -30,19 +30,19 @@ class PivotalTrackerFor(Tracker):
         super(PivotalTrackerFor, self).selectProject(number)
         self.trackerInstance_ = self.apiObject_.Tracker(self.project_, self.authentication_)
     
-    def _getItems(self):
+    def _getItems(self, forFilter=None):
         times = 3
         while times > 0:
-            stories = self._tryToGetStories()
+            stories = self._tryToGetStories(forFilter)
             if stories is not "garbage":
                 break
             times = times-1
         for story in stories:
             yield self._convertToItem(PivotalTrackerItem, story)
     
-    def _tryToGetStories(self):
+    def _tryToGetStories(self, forFilter=None):
         try: 
-            stories = self.trackerInstance_.GetStories()
+            stories = self.trackerInstance_.GetStories(forFilter)
         except Exception:
             return "garbage"
         return stories
@@ -62,7 +62,7 @@ class PivotalTrackerFor(Tracker):
             return
         self.trackerInstance_.DeleteStory(itemId)
     
-    def updateItemWithComments(self, item):
+    def addCommentsTo(self, item):
         comments = self.trackerInstance_.GetComments(item.Id())
         for comment in comments:
             item.addComment(comment.GetText(), 'existing')

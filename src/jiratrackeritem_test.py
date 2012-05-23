@@ -10,6 +10,7 @@ from jiraremotestructures import RemoteIssue
 from datetime import datetime
 from mockito.mockito import verify, when
 from mockito.mocking import mock
+from trackeritemstatus import TrackerItemStatus
 
 
 class JiraTrackerItem_Test(unittest.TestCase):
@@ -134,6 +135,25 @@ class JiraTrackerItem_Test(unittest.TestCase):
     def test_cannotSyncWithNoItem(self):
         item = JiraTrackerItem()
         self.assertFalse(item.canBeSyncedWith(None))
+        
+    def test_canAddStatus(self):
+        item = JiraTrackerItem()
+        statusId = 6
+        ticket = JiraTicket()
+        ticket.setStatus(statusId)
+        status = TrackerItemStatus(ticket)
+        item.withStatus(status)
+        self.assertEqual(item.status(), status)
+        self.assertEqual(item.underlying().status(), statusId)
+        self.assertEqual(item.piecesToUpdate(), [{'id':"status", 'values':[statusId,]},])
+
+        
+    def test_canGetStatusWhenAddedViaUnderlying(self):
+        testTicket = JiraTicket()
+        statusId = 6
+        testTicket.setStatus(statusId)
+        item = JiraTrackerItem(testTicket)
+        self.assertEqual(item.status().jira(), statusId)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

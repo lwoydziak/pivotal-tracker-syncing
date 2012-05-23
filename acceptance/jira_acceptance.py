@@ -11,6 +11,7 @@ from jiraitemfactory import jiraItemFactory
 sys.path.insert(0, "src")
 from jiratracker import JiraTracker
 from mappivotaltojirastatus import PivotalToJiraStatusMap
+from trackeritemstatus import TrackerItemStatus
 
 
 class JiraAccpetanceTest(unittest.TestCase):
@@ -81,24 +82,48 @@ class JiraAccpetanceTest(unittest.TestCase):
         aComment = Testing.addCommentToItemIn(tracker)
         item = next(tracker.items())
         self.assertEqual(item.comments()[0], aComment)
-        
-    def test_canGetAvailableStatusesForJira(self):
-        tracker = self.jira_
+
+    def mapStatuses(self, tracker):
         statuses = tracker.getAvailableStatuses()
         PivotalToJiraStatusMap().addMapping(jira="Closed", pivotal="Accepted")
+        PivotalToJiraStatusMap().addMapping(jira="New", pivotal="Not Yet Started")
         PivotalToJiraStatusMap().insert(statuses)
-        self.assertEqual(len(PivotalToJiraStatusMap()), 1)
+   
+    def test_canGetAvailableStatusesForJira(self):
+        tracker = self.jira_
+        self.mapStatuses(tracker)
+        self.assertEqual(len(PivotalToJiraStatusMap()), 2)
         
 #    def test_canAdjustStateOfTicket(self):
 #        tracker = self.jira_
+#        self.mapStatuses(tracker)
 #        item = jiraItemFactory(Env().jiraProject, "test_canAdjustStateOfTicket-1", "can comment on this?")
 #        tracker.update(item)
 #        item = next(tracker.items())
-#        status = InTest()
+#        status = TrackerItemStatus("Accepted")
 #        item.withStatus(status)
 #        tracker.update(item)
 #        item = next(tracker.items())
 #        self.assertEqual(item.status(), status)
+
+    def test_canFilterTicketsReturnedFromJiraSoNoMatchesAreFound(self):
+        tracker = self.jira_
+        item = jiraItemFactory(Env().jiraProject, "test_canFilterTicketsReturnedFromJiraSoNoMatchesAreFound", "description")
+        tracker.update(item)
+        forFilter = "labels = WLK"
+        self.assertRaises(StopIteration, next, tracker.items(forFilter))
+        
+    def test_canFilterTicketsReturnedFromJiraOnlyOneMatchIsFound(self):
+        tracker = self.jira_
+        item = jiraItemFactory(Env().jiraProject, "test_canFilterTicketsReturnedFromJiraOnlyOneMatchIsFound", "description")
+        tracker.update(item)
+        searchableSummary = "searchForMe"
+        forFilter = "summary ~ " + searchableSummary
+        item = jiraItemFactory(Env().jiraProject, searchableSummary, "description")
+        tracker.update(item)
+        item = tracker.items(forFilter)
+        self.assertEqual(next(item).summary(), searchableSummary)
+        self.assertRaises(StopIteration, next, item)
        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_canConnectToPivotalTrackerTestProject']
