@@ -6,9 +6,9 @@ Created on Apr 18, 2012
 import os
 import configparser
 import sys
+import csv
 sys.path.insert(0, "src")
 from singletonbase import Singleton
-
     
 ## Singleton
 class Env(object, metaclass=Singleton):
@@ -22,7 +22,7 @@ class Env(object, metaclass=Singleton):
         self.jiraPassword = "None"
         self.jiraUrl = "http://www.jira.com"
         self.jiraProject = "TEST"
-        self.jiraJql = ""
+        self.jiraJql_ = [[""]]
  
         if 'PIVOTAL_ACCEPTANCE_USE_CFG' in os.environ:            
             if os.environ['PIVOTAL_ACCEPTANCE_USE_CFG'] == '1':
@@ -42,7 +42,7 @@ class Env(object, metaclass=Singleton):
         self.jiraPassword = os.environ['JIRA_PASSWORD'] if 'JIRA_PASSWORD' in os.environ else "None"
         self.jiraUrl = os.environ['JIRA_URL'] if 'JIRA_URL' in os.environ else"http://www.jira.com"
         self.jiraProject = os.environ['JIRA_PROJECT'] if 'JIRA_PROJECT' in os.environ else "TEST"
-        self.jiraJql = os.environ['JIRA_JQL'] if 'JIRA_JQL' in os.environ else ""
+        self.jiraJql_ = csv.reader(os.environ['JIRA_JQL'], quotechar='\'', delimiter=',') if 'JIRA_JQL' in os.environ else [[""]]
 
     def load(self):        
         filename = ".pivotalacceptance.cfg"
@@ -61,4 +61,8 @@ class Env(object, metaclass=Singleton):
         self.jiraPassword = config.get("settings", "jiraPassword")
         self.jiraUrl = config.get("settings", "jiraUrl")
         self.jiraProject = config.get("settings", "jiraProject")
-        self.jiraJql = config.get("settings", "jiraJql")
+        self.jiraJql_ = csv.reader(config.get("settings", "jiraJql"), quotechar='\'', delimiter=',')
+        
+    def jiraJql(self):
+        for jql in self.jiraJql_:
+            yield jql[0].strip('\'')

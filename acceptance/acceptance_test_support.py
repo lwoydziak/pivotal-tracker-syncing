@@ -35,7 +35,7 @@ class SingleJira(object, metaclass=Singleton):
     def __init__(self):
         tracker = JiraTracker(Env().jiraUrl)
         tracker.loginAs(Env().jiraUsername).withCredential(Env().jiraPassword)
-        tracker.selectProject([Env().jiraProject, Env().jiraJql])
+        tracker.selectProject([Env().jiraProject, next(Env().jiraJql())])
         self.tracker_ = tracker
         
     def instance(self):
