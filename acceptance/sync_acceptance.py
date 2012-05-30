@@ -12,6 +12,7 @@ from jiratracker import JiraTracker
 from pivotaltracker import PivotalTrackerFor
 from jiraitemfactory import jiraItemFactory
 from pivotaltrackeritem import PivotalTrackerItem
+from trackersyncby import TrackerSyncBy
 from unit_test_support import Testing
 
 
@@ -30,10 +31,8 @@ class SyncAcceptanceTest(unittest.TestCase):
 
     def syncNewItemToPivotal(self, newJiraItem, jira, pivotal):
         jira.update(newJiraItem)
-        jiraItem = next(jira.items())
-        pivotalItem = PivotalTrackerItem()
-        pivotalItem.syncWith(jiraItem)
-        pivotal.update(pivotalItem)
+        syncByAddingItems = TrackerSyncBy.addingItemsOfType(PivotalTrackerItem)
+        syncByAddingItems(fromTracker=jira, toTracker=pivotal)
     
     def test_newIssueInJiraIsCopiedToPivotal(self):
         jira = self.jira_

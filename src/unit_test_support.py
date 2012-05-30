@@ -27,4 +27,8 @@ class Testing(object):
         for _ in range(1, size):
             stringToReturn += "a"
         return stringToReturn
+    
+    @staticmethod
+    def MockIterator(mock):
+        yield mock
         
