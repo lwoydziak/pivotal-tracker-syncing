@@ -22,7 +22,8 @@ class Env(object, metaclass=Singleton):
         self.jiraPassword = "None"
         self.jiraUrl = "http://www.jira.com"
         self.jiraProject = "TEST"
-        self.jiraJql_ = [[""]]
+        self.jiraJql_ = []
+        self.jiraJqlReader_ = []
  
         if 'PIVOTAL_ACCEPTANCE_USE_CFG' in os.environ:            
             if os.environ['PIVOTAL_ACCEPTANCE_USE_CFG'] == '1':
@@ -42,7 +43,7 @@ class Env(object, metaclass=Singleton):
         self.jiraPassword = os.environ['JIRA_PASSWORD'] if 'JIRA_PASSWORD' in os.environ else "None"
         self.jiraUrl = os.environ['JIRA_URL'] if 'JIRA_URL' in os.environ else"http://www.jira.com"
         self.jiraProject = os.environ['JIRA_PROJECT'] if 'JIRA_PROJECT' in os.environ else "TEST"
-        self.jiraJql_ = csv.reader(os.environ['JIRA_JQL'], quotechar='\'', delimiter=',') if 'JIRA_JQL' in os.environ else [[""]]
+        self.jiraJqlReader_ = csv.reader(os.environ['JIRA_JQL'], quotechar='\'', delimiter=',') if 'JIRA_JQL' in os.environ else []
 
     def load(self):        
         filename = ".pivotalacceptance.cfg"
@@ -61,8 +62,18 @@ class Env(object, metaclass=Singleton):
         self.jiraPassword = config.get("settings", "jiraPassword")
         self.jiraUrl = config.get("settings", "jiraUrl")
         self.jiraProject = config.get("settings", "jiraProject")
-        self.jiraJql_ = csv.reader(config.get("settings", "jiraJql"), quotechar='\'', delimiter=',')
+        self.jiraJqlReader_ = csv.reader(config.get("settings", "jiraJql"), quotechar='\'', delimiter=',')
         
     def jiraJql(self):
+        self._initializeJql()
         for jql in self.jiraJql_:
-            yield jql[0].strip('\'')
+            yield jql
+        
+    def _initializeJql(self):
+        for jql in self.jiraJqlReader_:
+            jqlAsStr = str(jql[0]) 
+            if "" == jqlAsStr:
+                continue
+            jql = jqlAsStr.strip('\'')
+            self.jiraJql_.append(jql) 
+         
