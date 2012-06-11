@@ -100,11 +100,10 @@ class JiraTracker(Tracker):
     
     def getAvailableStatuses(self):
         return self.trackerInstance_.getStatuses(self.authentication_)
-
     
-#    def _issueWithUpdatedStatusFrom(self, trackerItem):
-#        actions = self.trackerInstance_.getAvailableActions(self.authentication_, trackerItem.Id())
-#        return self.trackerInstance_.progressWorkflowAction(self.authentication_, trackerItem.Id(), trackerItem.status().jira(), [])
+    def _issueWithUpdatedStatusFrom(self, trackerItem):
+        actions = self.trackerInstance_.getAvailableActions(self.authentication_, trackerItem.Id())
+        return self.trackerInstance_.progressWorkflowAction(self.authentication_, trackerItem.Id(), trackerItem.status().jira(), [])
     
     
     

@@ -220,29 +220,26 @@ class JiraTracker_Test(unittest.TestCase):
         jiraInstance = self.getMockFor(jira)
         jira.getAvailableStatuses()
         verify(jiraInstance.service).getStatuses(self.auth_)
+     
+    def setupStatus(self): 
+        jira = JiraTracker()
+        jiraInstance = self.getMockFor(jira)
+        itemId = 1234
+        trackerItem = mock()
+        status = mock()
+        when(trackerItem).Id().thenReturn(itemId)
+        when(trackerItem).status().thenReturn(status)
+        return jira, jiraInstance, itemId, trackerItem, status
         
-#    def test_canUpdateStatus(self):
-#        jira = JiraTracker()
-#        jiraInstance = self.getMockFor(jira)
-#        statusId = 6
-#        itemId = 1234
-#        trackerItem = mock()
-#        status = mock()
-#        when(trackerItem).Id().thenReturn(itemId)
-#        when(trackerItem).status().thenReturn(status)
-#        when(status).jira().thenReturn(statusId)
-#        jira._issueWithUpdatedStatusFrom(trackerItem)
-#        verify(jiraInstance.service).progressWorkflowAction(self.auth_, itemId, statusId, any())
-#        
-#    
+    def test_canUpdateStatus(self):
+        statusId = 6
+        jira, jiraInstance, itemId, trackerItem, status = self.setupStatus()
+        when(status).jira().thenReturn(statusId)
+        jira._issueWithUpdatedStatusFrom(trackerItem)
+        verify(jiraInstance.service).progressWorkflowAction(self.auth_, itemId, statusId, any())
+         
 #    def test_willUpdateStatusBecauseItIsSeperateStepForJira(self):
-#        jira = JiraTracker()
-#        jiraInstance = self.getMockFor(jira)
-#        itemId = 1234
-#        trackerItem = mock()
-#        status = mock()
-#        when(trackerItem).Id().thenReturn(itemId)
-#        when(trackerItem).status().thenReturn(status)
+#        jira, jiraInstance, itemId, trackerItem, status = self.setupStatus()
 #        when(trackerItem).piecesToUpdate().thenReturn("status")
 #        when(trackerItem).comments(any()).thenReturn([])
 #        jira.update(trackerItem)

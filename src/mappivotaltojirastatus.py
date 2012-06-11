@@ -17,7 +17,7 @@ class PivotalToJiraStatusMap(object, metaclass=Singleton):
         
     def reset(self):
         self.mappings_ = {}
-        self.maps_ = {'jira': {}, 'pivotal' : {}}
+        self.maps_ = {'jira': {}, 'pivotal' : {}, }
          
     def addMapping(self, jira, pivotal):
         self.mappings_[jira] = pivotal

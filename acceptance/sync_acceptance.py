@@ -43,22 +43,23 @@ class SyncAcceptanceTest(unittest.TestCase):
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.summary(), summary)
     
-    def syncExistingItemFromJiraToPivotal(self, newJiraItem, jira, pivotal):
-        jira.update(newJiraItem)
-        jiraItem = next(jira.items())
-        pivotalItem = next(pivotal.items())
-        pivotalItem.syncWith(jiraItem)
-        pivotal.update(pivotalItem)
+    def syncExistingItemFrom(self, fromTracker, toTracker):
+        item = next(fromTracker.items())
+        syncItem = TrackerSyncBy.syncingItem()
+        syncItem(item, toTracker)
     
     def test_existingIssueInJiraIsSyncedWithExistingIssueInPivotal(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newPivotalItem = PivotalTrackerItem().withSummary("to be overwritten").withDescription("a test description to be overwritten")
-        pivotal.update(newPivotalItem)
         desiredSummary = "test_existingIssueInJiraIsSyncedWithExistingIssueInPivotal"
         desiredDescription = "overwritten!"
-        newJiraItem = jiraItemFactory(Env().jiraProject, desiredSummary, desiredDescription )
-        self.syncExistingItemFromJiraToPivotal(newJiraItem, jira, pivotal)
+        newJiraItem = jiraItemFactory(Env().jiraProject, "to be overwritten", "also overwritten" )
+        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
+        jiraItem = next(jira.items())
+        jiraItem.withDescription(desiredDescription)
+        jiraItem.withSummary(desiredSummary)
+        jira.update(jiraItem)
+        self.syncExistingItemFrom(jira, pivotal)
         updatedPivotalItem = next(pivotal.items())
         self.assertEqual(updatedPivotalItem.summary(), desiredSummary)
         self.assertEqual(updatedPivotalItem.description(), desiredDescription)
@@ -67,12 +68,13 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_commentOnIssueInJiraIsSyncedToPivotal(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newPivotalItem = PivotalTrackerItem().withSummary("to test comments").withDescription("description")
-        pivotal.update(newPivotalItem)
         newJiraItem = jiraItemFactory(Env().jiraProject, "to test comments", "blah")
+        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         commentOnJira = "this commentOnJira can be synced"
-        newJiraItem.addComment(commentOnJira)
-        self.syncExistingItemFromJiraToPivotal(newJiraItem, jira, pivotal)
+        jiraItem = next(jira.items())
+        jiraItem.addComment(commentOnJira)
+        jira.update(jiraItem)
+        self.syncExistingItemFrom(jira, pivotal)
         updatedPivotalItem = next(pivotal.items())
         self.assertEqual(updatedPivotalItem.comments()[0], commentOnJira)
         pass
@@ -80,16 +82,13 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_commentOnIssueInPivotalIsSyncedToJira(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newPivotalItem = PivotalTrackerItem().withSummary("to test comments").withDescription("description")
-        newJiraItem = jiraItemFactory(Env().jiraProject, "to test comments", "blah")
+        newJiraItem = jiraItemFactory(Env().jiraProject, "test_commentOnIssueInPivotalIsSyncedToJira", "blah")
+        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         commentOnPivotal = "this commentOnPivotal can be synced"
-        newPivotalItem.addComment(commentOnPivotal)
-        pivotal.update(newPivotalItem)
-        jira.update(newJiraItem)
-        jiraItem = next(jira.items())
         pivotalItem = next(pivotal.items())
-        jiraItem.syncWith(pivotalItem)
-        jira.update(jiraItem)
+        pivotalItem.addComment(commentOnPivotal)
+        pivotal.update(pivotalItem)
+        self.syncExistingItemFrom(pivotal, jira)
         updatedJiraItem = next(jira.items())
         self.assertEqual(updatedJiraItem.comments()[0], commentOnPivotal)
         pass
@@ -98,9 +97,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         jira = self.jira_
         pivotal = self.pivotal_
         newJiraItem = jiraItemFactory(Env().jiraProject, "test_issueInJiraAndInPivotalAreSyncable", "a test description")
-        newPivotalItem = PivotalTrackerItem().withSummary("test_issueInJiraAndInPivotalAreSyncable-2").withDescription("description")
-        pivotal.update(newPivotalItem)
-        self.syncExistingItemFromJiraToPivotal(newJiraItem, jira, pivotal)
+        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         jiraItem = next(jira.items())
         pivotalItem = next(pivotal.items())
         self.assertTrue(pivotalItem.canBeSyncedWith(jiraItem))

@@ -78,8 +78,7 @@
 		</fileset>  	
 		<fileset dir="${test.dir}">
 			<patternset>
-				<include name="**/*.py"/>	
-				<exclude name="*config*"/>	
+				<include name="**/*.py"/>		
 			</patternset>
 		</fileset>
   	</path>
