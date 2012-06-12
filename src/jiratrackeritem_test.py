@@ -66,12 +66,24 @@ class JiraTrackerItem_Test(unittest.TestCase):
         item.withSummary(summary)
         self.assertEqual(item.piecesToUpdate(), [{'id':"summary" , 'values':[summary,]}])
         
+    def test_summaryAsPiecesNotAddedWhenTryingToAddDuplicateSummary(self):
+        testIssue = mock()
+        item = JiraTrackerItem(testIssue)
+        item.withSummary(testIssue.summary)
+        self.assertEqual(item.piecesToUpdate(), [])
+        
     def test_descriptionAsPeicesToUpdateReturnedWhenItemIsUpdatedWithDescription(self):
         testIssue = self.testIssue()
         item = JiraTrackerItem(testIssue)
         description = "new value"
         item.withDescription(description)
         self.assertEqual(item.piecesToUpdate(), [{'id':"description" , 'values':[description,]}])
+        
+    def test_descriptionAsPiecesNotAddedWhenTryingToAddDuplicateDescription(self):
+        testIssue = mock()
+        item = JiraTrackerItem(testIssue)
+        item.withDescription(testIssue.description)
+        self.assertEqual(item.piecesToUpdate(), [])
         
     def test_canAddNewCommentToIssue(self):
         item = JiraTrackerItem()
@@ -146,7 +158,12 @@ class JiraTrackerItem_Test(unittest.TestCase):
         self.assertEqual(item.status(), status)
         self.assertEqual(item.underlying().status(), statusId)
         self.assertEqual(item.piecesToUpdate(), [{'id':"status", 'values':[statusId,]},])
-
+        
+#    def test_statusAsPiecesNotAddedWhenTryingToAddDuplicateStatus(self):
+#        testIssue = mock()
+#        item = JiraTrackerItem(testIssue)
+#        item.withStatus(testIssue.status)
+#        self.assertEqual(item.piecesToUpdate(), [])
         
     def test_canGetStatusWhenAddedViaUnderlying(self):
         testTicket = JiraTicket()
@@ -154,6 +171,18 @@ class JiraTrackerItem_Test(unittest.TestCase):
         testTicket.setStatus(statusId)
         item = JiraTrackerItem(testTicket)
         self.assertEqual(item.status().jira(), statusId)
+
+    def test_canGetUpdatedAtDateTime(self):
+        testTicket = mock()
+        item = JiraTrackerItem(testTicket)
+        self.assertEqual(str(testTicket.updated), str(item.updatedAt()))
+        
+    def test_settingJiraKeyDoesNotChangeUnderlying(self):
+        testTicket = mock()
+        item = JiraTrackerItem(testTicket)
+        tryKey = "jiraKey"
+        item.withJiraKey(tryKey)
+        self.assertNotEqual(tryKey, item.jiraKey())
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

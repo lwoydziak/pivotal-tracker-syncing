@@ -42,6 +42,11 @@ class JiraTicket(object):
 
     def status(self):
         return self.details_.status
+
+    def updatedAt(self):
+        return self.details_.updated
+    
+    
     
 
     

@@ -35,12 +35,16 @@ class JiraTrackerItem(TrackerItem):
         return self.ticket_ 
     
     def withSummary(self, summary):
+        if self.summary() is summary:
+            return
         super(JiraTrackerItem, self).withSummary(summary)
         self.ticket_.setSummary(summary)
         self.piecesToUpdate_.append({'id':"summary", 'values':[summary,]})
         return self
     
     def withDescription(self, description):
+        if self.description() is description:
+            return
         super(JiraTrackerItem, self).withDescription(description)
         self.ticket_.setDescrition(description)
         self.piecesToUpdate_.append({'id':"description", 'values':[description,]})
@@ -64,6 +68,9 @@ class JiraTrackerItem(TrackerItem):
     def jiraKey(self):
         return self.Id()
     
+    def withJiraKey(self, jiraKey):
+        return
+    
     def copyTypeSpecificDataTo(self, item):
         super(JiraTrackerItem, self).copyTypeSpecificDataTo(item)
         item.withJiraKey(self.jiraKey())
@@ -79,6 +86,9 @@ class JiraTrackerItem(TrackerItem):
         self.ticket_.setStatus(status.jira())
         self.piecesToUpdate_.append({'id':"status", 'values':[status.jira(),]})
         return self
+    
+    def updatedAt(self):
+        return self.underlying().updatedAt()
     
     
     

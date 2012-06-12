@@ -50,6 +50,11 @@ class JiraTicket_Test(unittest.TestCase):
         statusId = 6
         ticket.setStatus(statusId)
         self.assertEqual(ticket.status(), statusId)
+        
+    def test_canGetUpdatedDate(self):
+        testTicket = testRemoteIssueFactory()
+        ticket = JiraTicket(testTicket)
+        self.assertEqual(ticket.updatedAt(), testTicket.updated) 
 
 def testRemoteIssueFactory():
     testRemoteVersion = RemoteVersion()

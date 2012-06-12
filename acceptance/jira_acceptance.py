@@ -8,6 +8,7 @@ import sys
 from config import Env
 from acceptance_test_support import Testing, SingleJira
 from jiraitemfactory import jiraItemFactory
+from datetime import datetime, timedelta
 sys.path.insert(0, "src")
 from jiratracker import JiraTracker
 from mappivotaltojirastatus import PivotalToJiraStatusMap
@@ -68,8 +69,7 @@ class JiraAccpetanceTest(unittest.TestCase):
         tracker = self.jira_
         item = jiraItemFactory(Env().jiraProject, "test_canUpdateItemAlreadyInJira-1", "can update this?")
         tracker.update(item)
-        Testing.canUpdateItemsIn(tracker, self)
-        
+        Testing.canUpdateItemsIn(tracker, self)        
     
     def test_canAddCommentsToTicket(self):
         tracker = self.jira_
@@ -120,6 +120,17 @@ class JiraAccpetanceTest(unittest.TestCase):
         item = tracker.items(forFilter)
         self.assertEqual(next(item).summary(), searchableSummary)
         self.assertRaises(StopIteration, next, item)
+        
+    def test_ticketUpdatedWhenNotChangedDoesNotModifyTicket(self):
+        tracker = self.jira_
+        item = jiraItemFactory(Env().jiraProject, "test_ticketUpdatedWhenNotChangedDoesNotModifyTicket", "description")
+        tracker.update(item)
+        itemInJira = next(tracker.items())
+        itemInJira.syncWith(itemInJira)
+        tracker.update(itemInJira)
+        updatedItem = next(tracker.items())
+        self.assertEquals(itemInJira.updatedAt(), updatedItem.updatedAt())
+        
        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_canConnectToPivotalTrackerTestProject']
