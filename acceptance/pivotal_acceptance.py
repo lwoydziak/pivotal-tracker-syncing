@@ -24,7 +24,6 @@ class PivotalAcceptanceTest(unittest.TestCase):
     def tearDown(self):
         self.pivotal_.deleteAllItems()
         unittest.TestCase.tearDown(self)
-        
     
     def test_canConnectToPivotalTrackerTestProject(self):
         tracker = self.pivotal_
@@ -111,12 +110,20 @@ class PivotalAcceptanceTest(unittest.TestCase):
         tracker.update(item)
         item = PivotalTrackerItem().withSummary("test_canFilterStoriesReturnedFromTrackerOnlyOneMatchIsFound").withDescription("description")
         tracker.update(item)
-        time.sleep(2)
+        time.sleep(3)
         itemIterator = tracker.items(forFilter)
         next(itemIterator)
         self.assertRaises(StopIteration, next, itemIterator)
-         
-         
+                
+    def test_storyUpdatedWhenNotChangedDoesNotModifyStory(self):
+        tracker = self.pivotal_
+        item = PivotalTrackerItem().withSummary("test_storyUpdatedWhenNotChangedDoesNotModifyStory").withDescription("description")
+        tracker.update(item)
+        itemInPivotal = next(tracker.items())
+        itemInPivotal.syncWith(itemInPivotal)
+        tracker.update(itemInPivotal)
+        updatedItem = next(tracker.items())
+        self.assertEquals(itemInPivotal.updatedAt(), updatedItem.updatedAt())         
          
         
         

@@ -8,6 +8,7 @@ from pytracker import Story
 from copy import deepcopy
 from defaultparameter import defaultParameter
 import re
+from datetime import datetime
 
 class PivotalTrackerItem(TrackerItem):
     '''
@@ -19,10 +20,24 @@ class PivotalTrackerItem(TrackerItem):
         Constructor
         '''
         super(PivotalTrackerItem, self).__init__()
+        self.piecesToUpdate_ = []
         self.story_ = defaultParameter(Story, story)
         self._normalizeSummary(self.story_.GetName())
         self._normalizeDescription(self.story_.GetDescription())
+        self._determineIfNeedToUpdate(story)
         
+    def _determineIfNeedToUpdate(self, story):
+        self.needToUpdate_ = False
+        if story is None:
+            self.needToUpdate_ = True
+            return
+        self.piecesToUpdate_ = []
+        
+    def _addFieldToUpdate(self, field):
+        self.needToUpdate_ = True
+        if field not in self.piecesToUpdate_ and field is not None:
+            self.piecesToUpdate_.append(field)
+    
     def _returnRegexMatch(self, regex, subject):    
         match1 = subject
         match2 = None
@@ -51,27 +66,39 @@ class PivotalTrackerItem(TrackerItem):
         return self.story_
     
     def withSummary(self, summary):
+        if summary is self.summary():
+            return self
         super(PivotalTrackerItem, self).withSummary(summary)
         self.story_.SetName(summary)
+        self._addFieldToUpdate('name')
         return self
     
     def withDescription(self, description):
+        if description is self.description():
+            return self
         super(PivotalTrackerItem, self).withDescription(description)
         self.story_.SetDescription(description)
+        self._addFieldToUpdate('description')
         return self
     
     def Id(self):
         return self.underlying().GetStoryId()
 
     def withJiraUrl(self, jiraUrl):
+        if jiraUrl is self.jiraUrl():
+            return self
         self.story_.SetJiraUrl(jiraUrl)
+        self._addFieldToUpdate('description')
         return self
     
     def jiraUrl(self):
         return self.underlying().GetJiraUrl()
     
     def withJiraKey(self, jiraKey):
+        if jiraKey is self.jiraKey():
+            return self
         self.story_.SetJiraKey(jiraKey)
+        self._addFieldToUpdate('name')
         return self
     
     def jiraKey(self):
@@ -81,15 +108,32 @@ class PivotalTrackerItem(TrackerItem):
         if toSyncWith is None:
             return False
         return toSyncWith.canBeSyncedWith(self)
-
     
     def decoratedStory(self):
+        story = Story()
+        if self.needToUpdate_:
+            story = self._storyWithJiraInfo()        
+        story.UPDATE_FIELDS = self.piecesToUpdate_
+        return story
+        
+    def _storyWithJiraInfo(self):
         story = deepcopy(self.underlying())
         if self.jiraKey() is not None:
             story.SetName("[" + str(self.jiraKey()) + "]: " + str(self.summary()))
         if self.jiraUrl() is not None:
             story.SetDescription(str(self.jiraUrl()) + "\n" + str(self.description()))
         return story
+    
+    def updatedAt(self):
+        return datetime.utcfromtimestamp(self.underlying().GetUpdatedAt())
+    
+    def addComment(self, comment, kind='new'):
+        super(PivotalTrackerItem, self).addComment(comment, kind)
+        if kind is 'new':
+            self._addFieldToUpdate(None)
+
+    
+    
     
     
     
