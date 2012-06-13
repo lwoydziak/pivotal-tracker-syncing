@@ -55,8 +55,8 @@ class PivotalTrackerItem(TrackerItem):
         if jiraKey is not None:
             self.withJiraKey(jiraKey)
         
-    def _normalizeDescription(self, description):
-        description, jiraUrl = self._returnRegexMatch('(https://.+)[\n|\r](.*)', str(description)) #regex to match everything after https://<stuff>\n
+    def _normalizeDescription(self, description): 
+        description, jiraUrl = self._returnRegexMatch('(https?://.+)[\n|\r]([\s\S]*)', str(description)) #regex to match everything after https://<stuff>\n
         if description is not None:
             self.withDescription(description)
         if jiraUrl is not None:
@@ -66,7 +66,7 @@ class PivotalTrackerItem(TrackerItem):
         return self.story_
     
     def withSummary(self, summary):
-        if summary is self.summary():
+        if summary == self.summary():
             return self
         super(PivotalTrackerItem, self).withSummary(summary)
         self.story_.SetName(summary)
@@ -74,7 +74,7 @@ class PivotalTrackerItem(TrackerItem):
         return self
     
     def withDescription(self, description):
-        if description is self.description():
+        if description == self.description():
             return self
         super(PivotalTrackerItem, self).withDescription(description)
         self.story_.SetDescription(description)
@@ -85,7 +85,7 @@ class PivotalTrackerItem(TrackerItem):
         return self.underlying().GetStoryId()
 
     def withJiraUrl(self, jiraUrl):
-        if jiraUrl is self.jiraUrl():
+        if str(jiraUrl) == str(self.jiraUrl()):
             return self
         self.story_.SetJiraUrl(jiraUrl)
         self._addFieldToUpdate('description')
@@ -95,7 +95,7 @@ class PivotalTrackerItem(TrackerItem):
         return self.underlying().GetJiraUrl()
     
     def withJiraKey(self, jiraKey):
-        if jiraKey is self.jiraKey():
+        if jiraKey == self.jiraKey():
             return self
         self.story_.SetJiraKey(jiraKey)
         self._addFieldToUpdate('name')

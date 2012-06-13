@@ -35,7 +35,7 @@ class JiraTrackerItem(TrackerItem):
         return self.ticket_ 
     
     def withSummary(self, summary):
-        if self.summary() is summary:
+        if self.summary() == summary:
             return
         super(JiraTrackerItem, self).withSummary(summary)
         self.ticket_.setSummary(summary)
@@ -43,7 +43,7 @@ class JiraTrackerItem(TrackerItem):
         return self
     
     def withDescription(self, description):
-        if self.description() is description:
+        if self.description() == description:
             return
         super(JiraTrackerItem, self).withDescription(description)
         self.ticket_.setDescrition(description)

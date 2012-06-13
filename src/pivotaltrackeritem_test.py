@@ -161,11 +161,21 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
         self.assertEqual(item.summary(), summary)
         self.assertEqual(item.jiraKey(), jiraKey)
     
-    def test_itemConstructedWithDecoratedStoryWithJiraKeyGetsValidDescription(self):
+    def test_itemConstructedWithDecoratedStoryWithJiraKeyGetsValidDescriptionWithHTTP(self):
         story = Story()
-        jiraUrl = "https://www.jira.com/browse/TEST-1234"
-        description = "description"
-        decoratedDescription = "https://www.jira.com/browse/TEST-1234\ndescription"
+        jiraUrl = "http://www.jira.com/TEST-pa1234"
+        description = "this is a test\nwith\nmultiple\nlines"
+        decoratedDescription = "http://www.jira.com/TEST-pa1234\n" + description
+        story.SetDescription(decoratedDescription)
+        item = PivotalTrackerItem(story)
+        self.assertEqual(item.description(), description)
+        self.assertEqual(item.jiraUrl(), jiraUrl)
+        
+    def test_itemConstructedWithDecoratedStoryWithJiraKeyGetsValidDescriptionWithHTTPS(self):
+        story = Story()
+        jiraUrl = "https://www.jira.com/TEST-pa1234"
+        description = "this is a test\nwith\nmultiple\nlines" 
+        decoratedDescription = "https://www.jira.com/TEST-pa1234\n" + description
         story.SetDescription(decoratedDescription)
         item = PivotalTrackerItem(story)
         self.assertEqual(item.description(), description)
