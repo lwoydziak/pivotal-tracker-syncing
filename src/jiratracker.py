@@ -7,6 +7,7 @@ import suds
 from tracker import Tracker
 from jiratrackeritem import JiraTrackerItem
 from urllib.parse import urlparse
+from jirastatustoaction import JiraStatusToAction
 
 NAME = 0
 JQL = 1
@@ -72,9 +73,9 @@ class JiraTracker(Tracker):
         else:
             issue = self.trackerInstance_.updateIssue(self.authentication_, item.Id(), item.piecesToUpdate())
         updatedItem = JiraTrackerItem(issue)
-#        if "status" in str(item.piecesToUpdate()):
-#            updatedItem.withStatus(item.status())
-#            updatedItem = JiraTrackerItem(self._issueWithUpdatedStatusFrom(updatedItem))
+        if "status" in str(item.piecesToUpdate()):
+            updatedItem.withStatus(item.status())
+            updatedItem = JiraTrackerItem(self._ticketWithUpdatedStatusFrom(updatedItem))
         updatedItem.withComments(item.comments('new'))
         self.updateCommentsFor(updatedItem)
     
@@ -101,9 +102,15 @@ class JiraTracker(Tracker):
     def getAvailableStatuses(self):
         return self.trackerInstance_.getStatuses(self.authentication_)
     
-    def _issueWithUpdatedStatusFrom(self, trackerItem):
-        actions = self.trackerInstance_.getAvailableActions(self.authentication_, trackerItem.Id())
-        return self.trackerInstance_.progressWorkflowAction(self.authentication_, trackerItem.Id(), trackerItem.status().jira(), [])
+    def _ticketWithUpdatedStatusFrom(self, trackerItem):
+        actions = self.getNextStatusActionsFor(trackerItem)
+        return self.trackerInstance_.progressWorkflowAction(self.authentication_, trackerItem.Id(), JiraStatusToAction(trackerItem.status(), actions).Id(), [])
+
+    
+    def getNextStatusActionsFor(self, trackerItem):
+        return self.trackerInstance_.getAvailableActions(self.authentication_, trackerItem.Id())
+    
+    
     
     
     

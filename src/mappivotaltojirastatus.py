@@ -16,19 +16,20 @@ class PivotalToJiraStatusMap(object, metaclass=Singleton):
         self.reset()
         
     def reset(self):
-        self.mappings_ = {}
-        self.maps_ = {'jira': {}, 'pivotal' : {}, }
+        self.translateToPivotalStatusFrom_ = {}
+        self.translateStatusTo_ = {'jira': {}, 'pivotal' : {}, 'jiraStatusName': {}}
          
     def addMapping(self, jira, pivotal):
-        self.mappings_[jira] = pivotal
+        self.translateToPivotalStatusFrom_[jira] = pivotal
         
     def _insert(self, jiraStatus):
         try:
-            self.mappings_[jiraStatus.name]
+            pivotalStatus = self._getPivotalStatusMappingFor(jiraStatus.name)
         except KeyError:
             return
-        self.maps_['jira'][self.mappings_[jiraStatus.name]] = jiraStatus.id
-        self.maps_['pivotal'][jiraStatus.id] = self.mappings_[jiraStatus.name]
+        self.translateStatusTo_['jira'][pivotalStatus] = jiraStatus.name
+        self.translateStatusTo_['pivotal'][jiraStatus.name] = pivotalStatus
+        self.translateStatusTo_['jiraStatusName'][jiraStatus.id] = jiraStatus.name
     
     def insert(self, jiraStatus):
         if isinstance(jiraStatus, list):
@@ -37,8 +38,13 @@ class PivotalToJiraStatusMap(object, metaclass=Singleton):
             return
         self._insert(jiraStatus)
         
-    def translateStatusTo(self, kind, statusToTranslate):
-        return self.maps_[kind][statusToTranslate]
+    def _getPivotalStatusMappingFor(self, jiraStatusName):
+        return self.translateToPivotalStatusFrom_[jiraStatusName]
+        
+    def translateStatusTo(self, kind, fromStatusToTranslate):
+        if len(self) == 0:
+            return None
+        return self.translateStatusTo_[kind][fromStatusToTranslate]
     
     def __len__(self):
-        return len(self.maps_['pivotal'])
+        return len(self.translateStatusTo_['pivotal'])

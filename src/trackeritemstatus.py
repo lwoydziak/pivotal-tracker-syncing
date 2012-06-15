@@ -22,7 +22,8 @@ class TrackerItemStatus(object):
         if isinstance(base, str):
             self.container_ = PivotalStatus(base, apiObject)
             return
-        self.container_ = JiraStatus(base.status(), apiObject)
+        jiraStatusName = apiObject.translateStatusTo('jiraStatusName', base.status()) if base.status() != "" else None
+        self.container_ = JiraStatus(jiraStatusName, apiObject)
         
     def __eq__(self, other):
         if other is self:
@@ -41,35 +42,22 @@ class TrackerItemStatus(object):
         return self.container_.jira()
     
 class BaseStatus(object):
+    def __init__(self, seed=None, apiObject=None):
+        self.apiObject_ = apiObject
+        self.seed_ = seed
+        
     def pivotal(self):
-        return None
+        return self.seed_
     
     def jira(self):
-        return None    
+        return self.seed_    
     
 class PivotalStatus(BaseStatus):
-    def __init__(self, seed, apiObject):
-        self.apiObject_ = apiObject
-        self.seed_ = seed
-        
-    def pivotal(self):
-        return self.seed_
-    
     def jira(self):
         return self.apiObject_.translateStatusTo('jira', self.seed_)
-        
     
 class JiraStatus(BaseStatus):  
-    def __init__(self, seed, apiObject):
-        self.apiObject_ = apiObject
-        self.seed_ = seed
-        
     def pivotal(self):
         return self.apiObject_.translateStatusTo('pivotal', self.seed_)
-    
-    def jira(self):
-        return self.seed_
-    
-    
 
         

@@ -233,17 +233,18 @@ class JiraTracker_Test(unittest.TestCase):
         
     def test_canUpdateStatus(self):
         statusId = 6
+        actionId = None
         jira, jiraInstance, itemId, trackerItem, status = self.setupStatus()
         when(status).jira().thenReturn(statusId)
-        jira._issueWithUpdatedStatusFrom(trackerItem)
-        verify(jiraInstance.service).progressWorkflowAction(self.auth_, itemId, statusId, any())
+        jira._ticketWithUpdatedStatusFrom(trackerItem)
+        verify(jiraInstance.service).progressWorkflowAction(self.auth_, itemId, actionId, any())
          
-#    def test_willUpdateStatusBecauseItIsSeperateStepForJira(self):
-#        jira, jiraInstance, itemId, trackerItem, status = self.setupStatus()
-#        when(trackerItem).piecesToUpdate().thenReturn("status")
-#        when(trackerItem).comments(any()).thenReturn([])
-#        jira.update(trackerItem)
-#        verify(jiraInstance.service).progressWorkflowAction(any(), any(), any(), any())
+    def test_willUpdateStatusBecauseItIsSeperateStepForJira(self):
+        jira, jiraInstance, itemId, trackerItem, status = self.setupStatus()
+        when(trackerItem).piecesToUpdate().thenReturn("status")
+        when(trackerItem).comments(any()).thenReturn([])
+        jira.update(trackerItem)
+        verify(jiraInstance.service).progressWorkflowAction(any(), any(), any(), any())
         
     def setMocksForGettingItems(self, jiraInstance):
         when(jiraInstance.service).getIssuesFromJqlSearch(any(),any(),any()).thenReturn([])
@@ -266,6 +267,18 @@ class JiraTracker_Test(unittest.TestCase):
         self.setMocksForGettingItems(jiraInstance)
         self.assertRaises(StopIteration, next, jira._getItems(forFilter)) 
         verify(jiraInstance.service).getIssuesFromJqlSearch(any(),jql + " and " + forFilter,any()) 
+    
+    def test_canGetAvailableStatusNextStepsForATicket(self):
+        jira = JiraTracker()
+        jiraInstance = self.getMockFor(jira)
+        actions = ["next step1", "next step2"]
+        item = mock()
+        itemId = 1234 
+        when(item).Id().thenReturn(itemId)
+        when(jiraInstance.service).getAvailableActions(any(), any()).thenReturn(actions)
+        actionsReturned = jira.getNextStatusActionsFor(item)
+        verify(jiraInstance.service).getAvailableActions(self.auth_, itemId)
+        self.assertEqual(actions, actionsReturned)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

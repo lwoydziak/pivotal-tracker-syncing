@@ -90,17 +90,17 @@ class JiraAccpetanceTest(unittest.TestCase):
         self.mapStatuses(tracker)
         self.assertEqual(len(PivotalToJiraStatusMap()), 2)
         
-#    def test_canAdjustStateOfTicket(self):
-#        tracker = self.jira_
-#        self.mapStatuses(tracker)
-#        item = jiraItemFactory(Env().jiraProject, "test_canAdjustStateOfTicket-1", "can comment on this?")
-#        tracker.update(item)
-#        item = next(tracker.items())
-#        status = TrackerItemStatus("Accepted")
-#        item.withStatus(status)
-#        tracker.update(item)
-#        item = next(tracker.items())
-#        self.assertEqual(item.status(), status)
+    def test_canAdjustStateOfTicket(self):
+        tracker = self.jira_
+        self.mapStatuses(tracker)
+        item = jiraItemFactory(Env().jiraProject, "test_canAdjustStateOfTicket-1", "can comment on this?")
+        tracker.update(item)
+        item = next(tracker.items())
+        status = TrackerItemStatus("Accepted")
+        item.withStatus(status)
+        tracker.update(item)
+        item = next(tracker.items())
+        self.assertEqual(item.status(), status)
 
     def test_canFilterTicketsReturnedFromJiraSoNoMatchesAreFound(self):
         tracker = self.jira_

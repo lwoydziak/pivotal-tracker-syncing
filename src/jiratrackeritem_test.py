@@ -11,6 +11,8 @@ from datetime import datetime
 from mockito.mockito import verify, when
 from mockito.mocking import mock
 from trackeritemstatus import TrackerItemStatus
+from mappivotaltojirastatus import PivotalToJiraStatusMap
+from collections import namedtuple
 
 
 class JiraTrackerItem_Test(unittest.TestCase):
@@ -156,8 +158,7 @@ class JiraTrackerItem_Test(unittest.TestCase):
         status = TrackerItemStatus(ticket)
         item.withStatus(status)
         self.assertEqual(item.status(), status)
-        self.assertEqual(item.underlying().status(), statusId)
-        self.assertEqual(item.piecesToUpdate(), [{'id':"status", 'values':[statusId,]},])
+        self.assertEqual(item.piecesToUpdate(), [{'id':"status", 'values':['',]},])
         
 #    def test_statusAsPiecesNotAddedWhenTryingToAddDuplicateStatus(self):
 #        testIssue = mock()
@@ -166,11 +167,15 @@ class JiraTrackerItem_Test(unittest.TestCase):
 #        self.assertEqual(item.piecesToUpdate(), [])
         
     def test_canGetStatusWhenAddedViaUnderlying(self):
+        PivotalToJiraStatusMap().addMapping(jira="Closed", pivotal="Accepted") 
+        JiraStatus = namedtuple('JiraStatus', ['id', 'name'])
+        jiraStatus = JiraStatus(6, "Closed")
+        PivotalToJiraStatusMap().insert(jiraStatus)
         testTicket = JiraTicket()
-        statusId = 6
-        testTicket.setStatus(statusId)
+        testTicket.setStatus(jiraStatus.id)
         item = JiraTrackerItem(testTicket)
-        self.assertEqual(item.status().jira(), statusId)
+        self.assertEqual(item.status().jira(), jiraStatus.name)
+        PivotalToJiraStatusMap().reset()
 
     def test_canGetUpdatedAtDateTime(self):
         testTicket = mock()

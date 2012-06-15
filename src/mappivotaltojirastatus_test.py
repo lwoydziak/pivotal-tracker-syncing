@@ -14,7 +14,7 @@ class PivotalToJiraStatusMapTest(unittest.TestCase):
     
     def jiraClosedRemoteStatus(self):
         jiraStatus = RemoteStatus()
-        jiraStatus.id = 6
+        jiraStatus.id = 6 
         jiraStatus.name = "closed"
         return jiraStatus
     
@@ -23,8 +23,9 @@ class PivotalToJiraStatusMapTest(unittest.TestCase):
         jiraStatus = self.jiraClosedRemoteStatus()
         PivotalToJiraStatusMap().addMapping(jira=jiraStatus.name, pivotal=pivotalClosedStatus)
         PivotalToJiraStatusMap().insert(jiraStatus)
-        self.assertEqual(PivotalToJiraStatusMap().translateStatusTo('pivotal', jiraStatus.id), pivotalClosedStatus)
-        self.assertEqual(PivotalToJiraStatusMap().translateStatusTo('jira', pivotalClosedStatus), jiraStatus.id)
+        self.assertEqual(PivotalToJiraStatusMap().translateStatusTo('pivotal', jiraStatus.name), pivotalClosedStatus)
+        self.assertEqual(PivotalToJiraStatusMap().translateStatusTo('jira', pivotalClosedStatus), jiraStatus.name)
+        self.assertEqual(PivotalToJiraStatusMap().translateStatusTo('jiraStatusName', jiraStatus.id), jiraStatus.name)      
         
     def test_canInsertMultipleJiraStatuses(self):
         PivotalToJiraStatusMap().addMapping(jira="closed", pivotal="Accepted")
@@ -42,6 +43,10 @@ class PivotalToJiraStatusMapTest(unittest.TestCase):
         PivotalToJiraStatusMap().insert(jiraStatus)
         self.assertEqual(len(PivotalToJiraStatusMap()), 0)
         
+    def test_whenNoInsertsNothingCanBeTranslated(self):
+        self.assertEqual(None, PivotalToJiraStatusMap().translateStatusTo('pivotal', None))
+        self.assertEqual(None, PivotalToJiraStatusMap().translateStatusTo('jira', None))
+        self.assertEqual(None, PivotalToJiraStatusMap().translateStatusTo('jiraStatusName', None))
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_canMapJiraStatusToPivotalStatus']
     unittest.main()

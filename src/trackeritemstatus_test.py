@@ -6,20 +6,26 @@ Created on May 15, 2012
 import unittest
 from trackeritemstatus import TrackerItemStatus
 from jiraticket import JiraTicket
-from mockito.mockito import verify
+from mockito.mockito import verify, when
 from mockito.mocking import mock
+from mockito import inorder
+from mockito.verification import never
+from mockito.matchers import any
 
 
 class TrackerItemStatusTests(unittest.TestCase):
     def test_whenSeedingWithRemoteStatusForJira(self):
         ticket = JiraTicket()
         statusId = "1234"
+        closed = "Closed"
         ticket.setStatus(statusId)
         mapObject = mock()
+        when(mapObject).translateStatusTo('jiraStatusName', statusId).thenReturn(closed)
         status = TrackerItemStatus(ticket, apiObject=mapObject)
         status.pivotal()
-        verify(mapObject).translateStatusTo('pivotal', statusId)
-        self.assertEqual(status.jira(), statusId)
+        inorder.verify(mapObject).translateStatusTo('jiraStatusName', statusId)
+        inorder.verify(mapObject).translateStatusTo('pivotal', closed)
+        self.assertEqual(status.jira(), closed)
 
     def test_whenSeedingWithPivotalStatus(self):
         pivotalStatus = "Started"
@@ -49,6 +55,14 @@ class TrackerItemStatusTests(unittest.TestCase):
         self.assertTrue(status != statusNotEqual)
         self.assertFalse(status is statusNotEqual)
         self.assertTrue(status != garbage)
+        
+    def test_whenJiraIdIsZeroNameIsNone(self):
+        jiraStatus = mock()
+        mapObject = mock()
+        when(jiraStatus).status().thenReturn("")
+        status = TrackerItemStatus(jiraStatus, mapObject)
+        verify(mapObject, never).translateStatusTo(any(), any())
+        self.assertEqual(status.jira(), None)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

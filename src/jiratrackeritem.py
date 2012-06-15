@@ -83,8 +83,7 @@ class JiraTrackerItem(TrackerItem):
     
     def withStatus(self, status):
         super(JiraTrackerItem, self).withStatus(status)
-        self.ticket_.setStatus(status.jira())
-        self.piecesToUpdate_.append({'id':"status", 'values':[status.jira(),]})
+        self.piecesToUpdate_.append({'id':"status", 'values':[self.ticket_.status(),]})
         return self
     
     def updatedAt(self):
