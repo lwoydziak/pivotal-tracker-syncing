@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, "src")
 from jiratracker import JiraTracker
 from mappivotaltojirastatus import PivotalToJiraStatusMap
-from trackeritemstatus import TrackerItemStatus
+
 
 
 class JiraAccpetanceTest(unittest.TestCase):
@@ -93,12 +93,8 @@ class JiraAccpetanceTest(unittest.TestCase):
     def test_canAdjustStateOfTicket(self):
         tracker = self.jira_
         self.mapStatuses(tracker)
-        item = jiraItemFactory(Env().jiraProject, "test_canAdjustStateOfTicket-1", "can comment on this?")
-        tracker.update(item)
-        item = next(tracker.items())
-        status = TrackerItemStatus("Accepted")
-        item.withStatus(status)
-        tracker.update(item)
+        item = jiraItemFactory(Env().jiraProject, "test_canAdjustStateOfTicket-1", "can change the status of this ticket?")
+        Testing.putItemToTrackerAndChangeStatusToDone(item, tracker)
         item = next(tracker.items())
         self.assertEqual(item.status(), status)
 

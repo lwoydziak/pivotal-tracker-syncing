@@ -22,6 +22,7 @@ class JiraTrackerItem(TrackerItem):
         self.withDescription(self.ticket_.description())
         self.withSummary(self.ticket_.summary())
         self.withStatus(TrackerItemStatus(self.ticket_))
+        self.withType("bug")
         self.piecesToUpdate_ = []
        
         
@@ -82,6 +83,8 @@ class JiraTrackerItem(TrackerItem):
         return toSyncWith.jiraKey() == self.jiraKey()
     
     def withStatus(self, status):
+        if status == self.status():
+            return
         super(JiraTrackerItem, self).withStatus(status)
         self.piecesToUpdate_.append({'id':"status", 'values':[self.ticket_.status(),]})
         return self

@@ -212,6 +212,69 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
         storyToBeUpdated = item.decoratedStory()
         self.assertEqual(story.story_id, storyToBeUpdated.GetStoryId())
         
+    def test_canSetStatusForStory(self):
+        story = Story()
+        startingStatus = "unscheduled"
+        story.SetCurrentState(startingStatus)
+        accepted = "Accepted"
+        item = PivotalTrackerItem(story)
+        self.assertEqual(startingStatus, item.status().pivotal())
+        status = mock()
+        when(status).pivotal().thenReturn(accepted)
+        item.withStatus(status)
+        self.assertEqual(story.GetCurrentState(), accepted)
+        self.assertEqual(status, item.status())
+        self.assertTrue('current_state' in item.decoratedStory().UPDATE_FIELDS)
+        
+    def test_cannotSetDuplicateStatusForStory(self):
+        story = Story()
+        startingStatus = "unscheduled"
+        story.SetCurrentState(startingStatus)
+        item = PivotalTrackerItem(story)
+        item.withStatus(item.status())
+        self.assertEqual(startingStatus, item.status().pivotal())
+        self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)
+        
+    def test_cannotAddNoneStatus(self):
+        story = Story()
+        startingStatus = "unscheduled"
+        story.SetCurrentState(startingStatus)
+        item = PivotalTrackerItem(story)
+        item.withStatus(None)
+        self.assertEqual(startingStatus, item.status().pivotal())
+        self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)
+        
+        
+    def test_canSetTypeForStory(self):
+        story = Story()
+        defaultStoryType = "feature"
+        story.SetStoryType(defaultStoryType)
+        item = PivotalTrackerItem(story)
+        self.assertEqual(defaultStoryType, item.type())
+        type = "bug"
+        item.withType(type)
+        self.assertEqual(story.GetStoryType(), type)
+        self.assertEqual(type, item.type())
+        self.assertTrue('story_type' in item.decoratedStory().UPDATE_FIELDS)
+        
+    def test_cannotSetDuplicateTypeForStory(self):
+        story = Story()
+        defaultStoryType = "feature"
+        story.SetStoryType(defaultStoryType)
+        item = PivotalTrackerItem(story)
+        item.withType(item.type())
+        self.assertEqual(defaultStoryType, item.type())
+        self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)
+        
+    def test_cannotSetNoneTypeForStory(self):
+        story = Story()
+        defaultStoryType = "feature"
+        story.SetStoryType(defaultStoryType)
+        item = PivotalTrackerItem(story)
+        item.withType(None)
+        self.assertEqual(story.GetStoryType(), defaultStoryType)
+        self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

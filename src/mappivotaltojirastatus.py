@@ -44,7 +44,11 @@ class PivotalToJiraStatusMap(object, metaclass=Singleton):
     def translateStatusTo(self, kind, fromStatusToTranslate):
         if len(self) == 0:
             return None
-        return self.translateStatusTo_[kind][fromStatusToTranslate]
+        try:
+            status = self.translateStatusTo_[kind][fromStatusToTranslate]
+        except KeyError:
+            return None
+        return status
     
     def __len__(self):
         return len(self.translateStatusTo_['pivotal'])

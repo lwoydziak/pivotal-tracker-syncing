@@ -14,6 +14,8 @@ class TrackerItem(object):
         '''
         self.summary_ = None
         self.description_ = None
+        self.status_ = None
+        self.type_ = None
         self.comments_ = {'new':[], 'existing':[]}
         
     def withSummary(self, summary):
@@ -37,6 +39,7 @@ class TrackerItem(object):
         self.withDescription(item.description())
         self.withSummary(item.summary())
         self.withComments(item.comments())
+        self.withType(item.type())
         item.copyTypeSpecificDataTo(self)
         pass
     
@@ -60,9 +63,17 @@ class TrackerItem(object):
     
     def withStatus(self, status):
         self.status_ = status
+        return self
     
     def status(self):
         return self.status_
+    
+    def withType(self, type):
+        self.type_ = type
+        return self
+    
+    def type(self):
+        return self.type_
     
     
     

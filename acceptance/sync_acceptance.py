@@ -42,6 +42,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.summary(), summary)
+        self.assertEqual(pivotalItem.type(), 'bug')
     
     def syncExistingItemFrom(self, fromTracker, toTracker):
         item = next(fromTracker.items())

@@ -9,6 +9,7 @@ sys.path.insert(0, "src")
 from singletonbase import Singleton
 from jiratracker import JiraTracker
 from pivotaltracker import PivotalTrackerFor
+from trackeritemstatus import TrackerItemStatus
 
 class Testing(object):
 
@@ -30,6 +31,15 @@ class Testing(object):
         item.addComment(aComment)
         tracker.update(item)
         return aComment
+    
+    @staticmethod
+    def putItemToTrackerAndChangeStatusToDone(item, tracker):
+        tracker.update(item)
+        item = next(tracker.items())
+        status = TrackerItemStatus("accepted")
+        item.withStatus(status)
+        tracker.update(item)
+        return status
     
 class SingleJira(object, metaclass=Singleton):
     def __init__(self):

@@ -106,6 +106,19 @@ class TrackerItemTests(unittest.TestCase):
         item.withStatus(status)
         self.assertEqual(item.status(), status)
         
+    def test_canAddType(self):
+        item = TrackerItem()
+        type = "A Type"
+        item.withType(type)
+        self.assertEqual(type, item.type())
+        
+    def test_canSyncType(self):
+        type = "A Type"
+        typeB = "B Type"
+        item1 = TrackerItem().withType(type)
+        item2 = TrackerItem().withType(typeB)
+        item2.syncWith(item1)
+        self.assertEqual(type, item2.type())        
                 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

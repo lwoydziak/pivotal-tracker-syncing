@@ -9,6 +9,7 @@ from copy import deepcopy
 from defaultparameter import defaultParameter
 import re
 from datetime import datetime
+from trackeritemstatus import TrackerItemStatus
 
 class PivotalTrackerItem(TrackerItem):
     '''
@@ -24,6 +25,8 @@ class PivotalTrackerItem(TrackerItem):
         self.story_ = defaultParameter(Story, story)
         self._normalizeSummary(self.story_.GetName())
         self._normalizeDescription(self.story_.GetDescription())
+        self.withStatus(TrackerItemStatus(self.story_.GetCurrentState()))
+        self.withType(self.story_.GetStoryType())
         self._determineIfNeedToUpdate(story)
         
     def _determineIfNeedToUpdate(self, story):
@@ -131,7 +134,22 @@ class PivotalTrackerItem(TrackerItem):
         super(PivotalTrackerItem, self).addComment(comment, kind)
         if kind is 'new':
             self._addFieldToUpdate(None)
-
+            
+    def withStatus(self, status):
+        if status == self.status() or status is None:
+            return
+        super(PivotalTrackerItem, self).withStatus(status)
+        self.underlying().SetCurrentState(status.pivotal())
+        self._addFieldToUpdate('current_state')
+        return self
+    
+    def withType(self, type):
+        if type == self.type() or type is None:
+            return
+        super(PivotalTrackerItem, self).withType(type)
+        self.underlying().SetStoryType(type)
+        self._addFieldToUpdate('story_type')
+        return self
     
     
     

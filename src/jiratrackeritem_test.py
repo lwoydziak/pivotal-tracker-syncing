@@ -14,6 +14,8 @@ from trackeritemstatus import TrackerItemStatus
 from mappivotaltojirastatus import PivotalToJiraStatusMap
 from collections import namedtuple
 
+JiraStatus = namedtuple('JiraStatus', ['id', 'name'])
+
 
 class JiraTrackerItem_Test(unittest.TestCase):
     def test_changingSummaryChangesJiraTicketSummary(self):
@@ -151,6 +153,9 @@ class JiraTrackerItem_Test(unittest.TestCase):
         self.assertFalse(item.canBeSyncedWith(None))
         
     def test_canAddStatus(self):
+        PivotalToJiraStatusMap().addMapping(jira="Closed", pivotal="Accepted")
+        jiraStatus = JiraStatus(6, "Closed")
+        PivotalToJiraStatusMap().insert(jiraStatus)
         item = JiraTrackerItem()
         statusId = 6
         ticket = JiraTicket()
@@ -159,16 +164,17 @@ class JiraTrackerItem_Test(unittest.TestCase):
         item.withStatus(status)
         self.assertEqual(item.status(), status)
         self.assertEqual(item.piecesToUpdate(), [{'id':"status", 'values':['',]},])
+        PivotalToJiraStatusMap().reset()
         
-#    def test_statusAsPiecesNotAddedWhenTryingToAddDuplicateStatus(self):
-#        testIssue = mock()
-#        item = JiraTrackerItem(testIssue)
-#        item.withStatus(testIssue.status)
-#        self.assertEqual(item.piecesToUpdate(), [])
+    def test_statusAsPiecesNotAddedWhenTryingToAddDuplicateStatus(self):
+        testIssue = mock()
+        item = JiraTrackerItem(testIssue)
+        duplicateStatus = item.status()
+        item.withStatus(duplicateStatus)
+        self.assertEqual(item.piecesToUpdate(), [])
         
     def test_canGetStatusWhenAddedViaUnderlying(self):
         PivotalToJiraStatusMap().addMapping(jira="Closed", pivotal="Accepted") 
-        JiraStatus = namedtuple('JiraStatus', ['id', 'name'])
         jiraStatus = JiraStatus(6, "Closed")
         PivotalToJiraStatusMap().insert(jiraStatus)
         testTicket = JiraTicket()
@@ -188,6 +194,10 @@ class JiraTrackerItem_Test(unittest.TestCase):
         tryKey = "jiraKey"
         item.withJiraKey(tryKey)
         self.assertNotEqual(tryKey, item.jiraKey())
+        
+    def test_jiraItemTypeIsBug(self):
+        item = JiraTrackerItem()
+        self.assertEqual("bug", item.type())
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
