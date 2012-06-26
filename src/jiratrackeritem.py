@@ -7,12 +7,13 @@ from trackeritem import TrackerItem
 from jiraticket import JiraTicket
 from trackeritemstatus import TrackerItemStatus
 from defaultparameter import defaultParameter
+from copy import deepcopy
 
 class JiraTrackerItem(TrackerItem):
     '''
     classdocs
     '''
-    def __init__(self, ticket=None):
+    def __init__(self, ticket=None, timezone=None):
         '''
         Constructor
         '''
@@ -23,6 +24,7 @@ class JiraTrackerItem(TrackerItem):
         self.withSummary(self.ticket_.summary())
         self.withStatus(TrackerItemStatus(self.ticket_))
         self.withType("bug")
+        self.timezone_ = timezone
         self.piecesToUpdate_ = []
        
         
@@ -90,7 +92,8 @@ class JiraTrackerItem(TrackerItem):
         return self
     
     def updatedAt(self):
-        return self.underlying().updatedAt()
+        dateAndTime = deepcopy(self.underlying().updatedAt()).replace(tzinfo=self.timezone_)
+        return self._convertToUtc(dateAndTime)
     
     
     

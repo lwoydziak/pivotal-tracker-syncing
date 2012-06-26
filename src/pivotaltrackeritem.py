@@ -8,7 +8,7 @@ from pytracker import Story
 from copy import deepcopy
 from defaultparameter import defaultParameter
 import re
-from datetime import datetime
+from datetime import datetime, tzinfo, timedelta
 from trackeritemstatus import TrackerItemStatus
 
 class PivotalTrackerItem(TrackerItem):
@@ -16,7 +16,7 @@ class PivotalTrackerItem(TrackerItem):
     classdocs
     '''
 
-    def __init__(self, story=None ):
+    def __init__(self, story=None, timezone=None ):
         '''
         Constructor
         '''
@@ -27,6 +27,7 @@ class PivotalTrackerItem(TrackerItem):
         self._normalizeDescription(self.story_.GetDescription())
         self.withStatus(TrackerItemStatus(self.story_.GetCurrentState()))
         self.withType(self.story_.GetStoryType())
+        self.timezone_ = timezone
         self._determineIfNeedToUpdate(story)
         
     def _determineIfNeedToUpdate(self, story):
@@ -128,7 +129,7 @@ class PivotalTrackerItem(TrackerItem):
         return story
     
     def updatedAt(self):
-        return datetime.utcfromtimestamp(self.underlying().GetUpdatedAt())
+        return self._convertToUtc(datetime.utcfromtimestamp(self.underlying().GetUpdatedAt()).replace(tzinfo=self.timezone_))
     
     def addComment(self, comment, kind='new'):
         super(PivotalTrackerItem, self).addComment(comment, kind)

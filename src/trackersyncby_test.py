@@ -10,25 +10,28 @@ from mockito.mockito import when, verify
 from mockito.matchers import any
 from mockito.verification import never
 from unit_test_support import Testing
+from mockito import inorder
 
 
 
 
 class TrackerSyncByTest(unittest.TestCase):
-    def test_canAddNewItemsWhenItemsNotInTracker(self):
+    def test_canAddNewItemNotInTrackerAndwhenAddingUpdateItemBeforeUpdatingDetails(self):
         toTracker = mock()
         fromTracker = mock()
         itemToBeAdded = mock()
         detectedItem = mock()
+        itemWithDetails = mock()
         TrackerItemType = mock()
         when(fromTracker).items(any()).thenReturn([detectedItem])
         when(toTracker).items(any()).thenReturn([])
         when(TrackerItemType).called().thenReturn(itemToBeAdded)
+        when(toTracker).update(itemToBeAdded).thenReturn(itemWithDetails)
         syncByAddingItems = TrackerSyncBy.addingItemsOfType(TrackerItemType.called)
         syncByAddingItems(fromTracker, toTracker)
-        verify(itemToBeAdded).syncWith(detectedItem)
-        verify(TrackerItemType).called()
-        verify(toTracker).update(itemToBeAdded)
+        inorder.verify(toTracker).items(any())
+        inorder.verify(toTracker).update(itemToBeAdded)
+        inorder.verify(toTracker).update(itemWithDetails)
 
     def test_doNotAddItemWhenItemInTracker(self):
         toTracker = mock()
@@ -84,9 +87,10 @@ class TrackerSyncByTest(unittest.TestCase):
         when(toTracker).items(any()).thenReturn(Testing.MockIterator([detectedItem,detectedItem]))
         when(detectedItem).canBeSyncedWith(detectedItem).thenReturn(False)
         when(TrackerItemType).called().thenReturn(itemToBeAdded)
+        when(toTracker).update(itemToBeAdded).thenReturn(itemToBeAdded)
         syncByAddingItems = TrackerSyncBy.addingItemsOfType(TrackerItemType.called)
         syncByAddingItems(fromTracker, toTracker)
-        verify(toTracker).update(itemToBeAdded)
+        verify(toTracker, times=2).update(itemToBeAdded)
         
     def test_addCommentsAndUpdateIssue(self):
         toTracker = mock()
@@ -95,6 +99,8 @@ class TrackerSyncByTest(unittest.TestCase):
         syncCommentsFor = TrackerSyncBy.syncingItem()
         when(toTracker).items(None).thenReturn(Testing.MockIterator([itemToAddCommentsTo]))
         when(itemToAddCommentsTo).canBeSyncedWith(itemToGetCommentsFrom).thenReturn(True)
+        when(itemToAddCommentsTo).updatedAt().thenReturn(0)
+        when(itemToGetCommentsFrom).updatedAt().thenReturn(1)
         syncCommentsFor(itemToGetCommentsFrom, toTracker)
         verify(itemToAddCommentsTo).syncWith(itemToGetCommentsFrom)
         verify(toTracker).update(itemToAddCommentsTo)
@@ -123,6 +129,8 @@ class TrackerSyncByTest(unittest.TestCase):
         syncCommentsFor = TrackerSyncBy.syncingItem(FilteringOutCommentsFor=testFilter.calledWith)
         when(toTracker).items(None).thenReturn(Testing.MockIterator([item]))
         when(item).canBeSyncedWith(otherItem).thenReturn(True)
+        when(item).updatedAt().thenReturn(0)
+        when(otherItem).updatedAt().thenReturn(1)
         syncCommentsFor(otherItem, toTracker)
         verify(testFilter).calledWith(item)
         
@@ -136,7 +144,33 @@ class TrackerSyncByTest(unittest.TestCase):
         syncCommentsFor(otherItem, toTracker)
         verify(item, never).syncWith(any())
         verify(toTracker, never).update(item)
+        
+    def setupSync(self):
+        toTracker = mock()
+        itemToSyncTo = mock()
+        itemToSyncFrom = mock()
+        syncCommentsFor = TrackerSyncBy.syncingItem()
+        when(toTracker).items(None).thenReturn(Testing.MockIterator([itemToSyncTo]))
+        return toTracker, itemToSyncTo, itemToSyncFrom, syncCommentsFor
+        
+    def test_syncIfItemIsMoreUpToDate(self):
+        toTracker, itemToSyncTo, itemToSyncFrom, syncCommentsFor = self.setupSync()
+        when(itemToSyncTo).updatedAt().thenReturn(0)
+        when(itemToSyncFrom).updatedAt().thenReturn(1)
+        when(itemToSyncTo).canBeSyncedWith(itemToSyncFrom).thenReturn(True)
+        syncCommentsFor(itemToSyncFrom, toTracker)
+        verify(itemToSyncTo).syncWith(itemToSyncFrom)
+        verify(toTracker).update(itemToSyncTo)
 
+    def test_doNotSyncIfItemIsLessUpToDate(self):
+        toTracker, itemToSyncTo, itemToSyncFrom, syncCommentsFor = self.setupSync()
+        when(itemToSyncTo).updatedAt().thenReturn(1)
+        when(itemToSyncFrom).updatedAt().thenReturn(0)
+        when(itemToSyncTo).canBeSyncedWith(itemToSyncFrom).thenReturn(True)
+        syncCommentsFor(itemToSyncFrom, toTracker)
+        verify(toTracker, never).update(itemToSyncTo)
+
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

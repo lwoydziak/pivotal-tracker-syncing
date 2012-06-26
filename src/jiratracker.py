@@ -24,6 +24,7 @@ class JiraTracker(Tracker):
         super(JiraTracker, self).__init__()
         self.project_ = ["",""]
         self.setLocationTo(url)
+        self.timezone_ = None
         self.apiObject(suds.client)
         
     def __del__(self):
@@ -59,7 +60,7 @@ class JiraTracker(Tracker):
         except Exception as e:
             print (e.fault.faultstring)
         for issue in issues:
-            yield self._convertToItem(JiraTrackerItem, issue)
+            yield self._convertToItem(JiraTrackerItem, issue, self.timezone_)
     
     def finalize(self):
         self.trackerInstance_.logout(self.authentication_)
@@ -77,7 +78,8 @@ class JiraTracker(Tracker):
             updatedItem.withStatus(item.status())
             updatedItem = JiraTrackerItem(self._ticketWithUpdatedStatusFrom(updatedItem))
         updatedItem.withComments(item.comments('new'))
-        self.updateCommentsFor(updatedItem)
+        # to be fully complete updatedItem also needs exisiting comments - tbd
+        return self.updateCommentsFor(updatedItem)
     
     def _deleteById(self, itemId):
         self.trackerInstance_.deleteIssue(self.authentication_, itemId)
@@ -90,8 +92,11 @@ class JiraTracker(Tracker):
         return item
 
     def updateCommentsFor(self, item):
-        for comment in item.comments('new'):
+        comments = item.comments('new')
+        for comment in comments[:]:
             self.trackerInstance_.addComment(self.authentication_, item.Id(), {"body":comment})
+            #now comments in the new should be moved to existing - tbd
+        return item     
     
     def _setExtraFieldsFor(self, item):
         item = super(JiraTracker, self)._setExtraFieldsFor(item)
@@ -104,11 +109,23 @@ class JiraTracker(Tracker):
     
     def _ticketWithUpdatedStatusFrom(self, trackerItem):
         actions = self.getNextStatusActionsFor(trackerItem)
-        return self.trackerInstance_.progressWorkflowAction(self.authentication_, trackerItem.Id(), JiraStatusToAction(trackerItem.status(), actions).Id(), [])
-
+        actionToChangeStatus = JiraStatusToAction(trackerItem.status(), actions).Id()
+        if actionToChangeStatus is not None:
+            return self.trackerInstance_.progressWorkflowAction(self.authentication_, trackerItem.Id(), actionToChangeStatus, [])
+        else:
+            return trackerItem.underlying()
     
     def getNextStatusActionsFor(self, trackerItem):
         return self.trackerInstance_.getAvailableActions(self.authentication_, trackerItem.Id())
+
+    
+    def setTimezone(self, timezone):
+        self.timezone_ = timezone
+        
+    def timezone(self):
+        return self.timezone_
+    
+    
     
     
     

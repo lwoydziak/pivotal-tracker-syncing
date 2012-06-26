@@ -15,9 +15,12 @@ from datetime import datetime
 from jiratrackeritem import JiraTrackerItem
 from mockito import inorder
 from unit_test_support import Testing
+from collections import namedtuple
 
 class Holder(object):
     pass
+
+TestAction = namedtuple("TestAction", ["id", "name"])
 
 class JiraTracker_Test(unittest.TestCase):
     def getMockFor(self, jira):
@@ -50,7 +53,9 @@ class JiraTracker_Test(unittest.TestCase):
         jiraInstance.service = mock()
         jira.apiObject(jiraApiObject)
         password = "pass"
+        auth = mock()
         when(jiraApiObject).Client(any(), timeout=any()).thenReturn(jiraInstance)
+        when(jiraInstance.service).login(any(),any()).thenReturn(auth)
         jira.withCredential(password)
         verify(jiraInstance.service).login(any(),password)
         pass
@@ -232,17 +237,22 @@ class JiraTracker_Test(unittest.TestCase):
         return jira, jiraInstance, itemId, trackerItem, status
         
     def test_canUpdateStatus(self):
-        statusId = 6
-        actionId = None
+        statusId = "Match"
+        action = TestAction(5,statusId)
         jira, jiraInstance, itemId, trackerItem, status = self.setupStatus()
         when(status).jira().thenReturn(statusId)
+        when(jiraInstance.service).getAvailableActions(any(), any()).thenReturn([action,])
         jira._ticketWithUpdatedStatusFrom(trackerItem)
-        verify(jiraInstance.service).progressWorkflowAction(self.auth_, itemId, actionId, any())
+        verify(jiraInstance.service).progressWorkflowAction(self.auth_, itemId, action.id, any())
          
     def test_willUpdateStatusBecauseItIsSeperateStepForJira(self):
         jira, jiraInstance, itemId, trackerItem, status = self.setupStatus()
+        statusId = "Match"
+        action = TestAction(5,statusId)
+        when(status).jira().thenReturn(statusId)
         when(trackerItem).piecesToUpdate().thenReturn("status")
         when(trackerItem).comments(any()).thenReturn([])
+        when(jiraInstance.service).getAvailableActions(any(), any()).thenReturn([action,])
         jira.update(trackerItem)
         verify(jiraInstance.service).progressWorkflowAction(any(), any(), any(), any())
         
@@ -279,6 +289,14 @@ class JiraTracker_Test(unittest.TestCase):
         actionsReturned = jira.getNextStatusActionsFor(item)
         verify(jiraInstance.service).getAvailableActions(self.auth_, itemId)
         self.assertEqual(actions, actionsReturned)
+        
+    def test_canGetTimeZoneInfoForThisJira(self):
+        jira = JiraTracker()
+        jiraInstance = self.getMockFor(jira)
+        timezone = mock()
+        jira.setTimezone(timezone)
+        self.assertEqual(timezone, jira.timezone()) 
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

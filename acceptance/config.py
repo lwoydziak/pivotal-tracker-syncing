@@ -22,6 +22,7 @@ class Env(object, metaclass=Singleton):
         self.jiraPassword = "None"
         self.jiraUrl = "http://www.jira.com"
         self.jiraProject = "TEST"
+        self.jiraTimeToUtcHours = 0
         self.jiraJql_ = []
         self.jiraJqlReader_ = []
  
@@ -43,6 +44,7 @@ class Env(object, metaclass=Singleton):
         self.jiraPassword = os.environ['JIRA_PASSWORD'] if 'JIRA_PASSWORD' in os.environ else "None"
         self.jiraUrl = os.environ['JIRA_URL'] if 'JIRA_URL' in os.environ else"http://www.jira.com"
         self.jiraProject = os.environ['JIRA_PROJECT'] if 'JIRA_PROJECT' in os.environ else "TEST"
+        self.jiraTimeToUtcHours = int(os.environ['JIRA_TIME_TO_UTC_HOURS'] if 'JIRA_TIME_TO_UTC_HOURS' in os.environ else 0)
         self.jiraJqlReader_ = csv.reader(os.environ['JIRA_JQL'], quotechar='\'', delimiter=',') if 'JIRA_JQL' in os.environ else []
 
     def load(self):        
@@ -62,6 +64,7 @@ class Env(object, metaclass=Singleton):
         self.jiraPassword = config.get("settings", "jiraPassword")
         self.jiraUrl = config.get("settings", "jiraUrl")
         self.jiraProject = config.get("settings", "jiraProject")
+        self.jiraTimeToUtcHours = config.getint("settings", "jiraTimeToUtcHours")
         self.jiraJqlReader_ = csv.reader(config.get("settings", "jiraJql"), quotechar='\'', delimiter=',')
         
     def jiraJql(self):

@@ -10,6 +10,8 @@ from singletonbase import Singleton
 from jiratracker import JiraTracker
 from pivotaltracker import PivotalTrackerFor
 from trackeritemstatus import TrackerItemStatus
+from mappivotaltojirastatus import PivotalToJiraStatusMap
+from timezonejira import JiraTimezone
 
 class Testing(object):
 
@@ -41,9 +43,17 @@ class Testing(object):
         tracker.update(item)
         return status
     
+    @staticmethod
+    def mapStatuses(tracker):
+        statuses = tracker.getAvailableStatuses()
+        PivotalToJiraStatusMap().addMapping(jira="Closed", pivotal="accepted")
+        PivotalToJiraStatusMap().addMapping(jira="New", pivotal="unscheduled")
+        PivotalToJiraStatusMap().insert(statuses)
+    
 class SingleJira(object, metaclass=Singleton):
     def __init__(self):
         tracker = JiraTracker(Env().jiraUrl)
+        tracker.setTimezone(JiraTimezone(Env().jiraTimeToUtcHours))
         tracker.loginAs(Env().jiraUsername).withCredential(Env().jiraPassword)
         tracker.selectProject([Env().jiraProject, next(Env().jiraJql())])
         self.tracker_ = tracker

@@ -3,6 +3,7 @@ Created on May 30, 2012
 
 @author: lwoydziak
 '''
+from datetime import time
 
 def defaultFilter(item):
     return None
@@ -26,21 +27,24 @@ class TrackerSyncBy(object):
                 if itemFound:
                     continue
                 newItem = TrackerItemType()
+                newItem = toTracker.update(newItem)
                 newItem.syncWith(item)
                 toTracker.update(newItem)
         return addingItems_
     
     @staticmethod
     def syncingItem(FilterForItem=defaultFilter, FilteringOutCommentsFor=defaultFilter):
-        def addingComments_(itemToSyncWith, toTracker):
+        def syncingDetails_(itemToSyncWith, toTracker):
             forFilter = FilterForItem(itemToSyncWith)
             try:
                 item = next(toTracker.items(forFilter))
             except StopIteration:
                 return
             else:
-                if item.canBeSyncedWith(itemToSyncWith):
+                itemUpdated =  item.updatedAt()
+                otherItemUpdated = itemToSyncWith.updatedAt()
+                if item.canBeSyncedWith(itemToSyncWith) and itemUpdated <= otherItemUpdated:
                     item.syncWith(itemToSyncWith)
                     FilteringOutCommentsFor(item)
                     toTracker.update(item)
-        return addingComments_
+        return syncingDetails_

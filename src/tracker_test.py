@@ -68,15 +68,19 @@ class TrackerTest(unittest.TestCase):
     def test_canConvertItemToType(self):
         tracker = Tracker()
         contents = mock()
-        item = tracker._convertToItem(testType, contents)
-        self.assertEqual(item.contains(), contents)
+        timezone = mock()
+        item = tracker._convertToItem(testType, contents, timezone )
+        storedItem, storedTimezone = item.contains()
+        self.assertEqual(storedItem, contents)
+        self.assertEqual(storedTimezone, timezone)
 
 class testType(object):
-    def __init__(self, item):
+    def __init__(self, item, timezone):
         self.item = item
+        self.timezone = timezone
     
     def contains(self):
-        return self.item
+        return self.item, self.timezone
         
 
 if __name__ == "__main__":

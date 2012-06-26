@@ -14,7 +14,10 @@ from pivotaltracker import PivotalTrackerFor
 from jiraitemfactory import jiraItemFactory
 from pivotaltrackeritem import PivotalTrackerItem
 from trackersyncby import TrackerSyncBy
+from trackeritemstatus import TrackerItemStatus
+from mappivotaltojirastatus import PivotalToJiraStatusMap
 from unit_test_support import Testing
+from acceptance_test_support import Testing as AcceptanceTesting
 
 
 
@@ -23,11 +26,13 @@ class SyncAcceptanceTest(unittest.TestCase):
         unittest.TestCase.setUp(self)
         self.jira_ = SingleJira().instance()
         self.pivotal_ = SinglePivotal().instance()
+        AcceptanceTesting.mapStatuses(self.jira_)
         pass
 
     def tearDown(self):
         self.jira_.deleteAllItems()
         self.pivotal_.deleteAllItems()
+        PivotalToJiraStatusMap().reset()
         unittest.TestCase.tearDown(self)
 
     def syncNewItemToPivotal(self, newJiraItem, jira, pivotal):
@@ -35,6 +40,11 @@ class SyncAcceptanceTest(unittest.TestCase):
         syncByAddingItems = TrackerSyncBy.addingItemsOfType(PivotalTrackerItem)
         syncByAddingItems(fromTracker=jira, toTracker=pivotal)
     
+    def syncExistingItemFrom(self, fromTracker, toTracker):
+        item = next(fromTracker.items())
+        syncItem = TrackerSyncBy.syncingItem()
+        syncItem(item, toTracker)
+        
     def test_newIssueInJiraIsCopiedToPivotal(self):
         jira = self.jira_
         pivotal = self.pivotal_
@@ -44,11 +54,6 @@ class SyncAcceptanceTest(unittest.TestCase):
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.summary(), summary)
         self.assertEqual(pivotalItem.type(), 'bug')
-    
-    def syncExistingItemFrom(self, fromTracker, toTracker):
-        item = next(fromTracker.items())
-        syncItem = TrackerSyncBy.syncingItem()
-        syncItem(item, toTracker)
     
     def test_existingIssueInJiraIsSyncedWithExistingIssueInPivotal(self):
         jira = self.jira_
@@ -103,8 +108,6 @@ class SyncAcceptanceTest(unittest.TestCase):
         jiraItem = next(jira.items())
         pivotalItem = next(pivotal.items())
         self.assertTrue(pivotalItem.canBeSyncedWith(jiraItem))
-        pass
-
     
     def test_20000PlusCharacterCommentsAreNotSyned(self):
         jira = self.jira_
@@ -115,6 +118,20 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         pivotalItem = next(pivotal.items())
         self.assertEqual(len(pivotalItem.comments()), 0)
+        
+    def test_canSyncStatusToPivotalForExistingItems(self):
+        jira = self.jira_
+        pivotal = self.pivotal_
+        newJiraItem = jiraItemFactory(Env().jiraProject, "test_canSyncStatusToPivotalForExistingItems", "a test description")
+        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
+        jiraItem = next(jira.items())
+        status = TrackerItemStatus("accepted")
+        jiraItem.withStatus(status)
+        jira.update(jiraItem)
+        self.syncExistingItemFrom(jira, pivotal)
+        pivotalItem = next(pivotal.items())
+        self.assertEqual(pivotalItem.status(),status)
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

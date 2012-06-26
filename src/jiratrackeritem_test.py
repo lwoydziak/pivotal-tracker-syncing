@@ -7,12 +7,13 @@ import unittest
 from jiratrackeritem import JiraTrackerItem
 from jiraticket import JiraTicket
 from jiraremotestructures import RemoteIssue
-from datetime import datetime
+from datetime import datetime, date, tzinfo
 from mockito.mockito import verify, when
 from mockito.mocking import mock
 from trackeritemstatus import TrackerItemStatus
 from mappivotaltojirastatus import PivotalToJiraStatusMap
 from collections import namedtuple
+from timezoneutc import UTC
 
 JiraStatus = namedtuple('JiraStatus', ['id', 'name'])
 
@@ -184,9 +185,13 @@ class JiraTrackerItem_Test(unittest.TestCase):
         PivotalToJiraStatusMap().reset()
 
     def test_canGetUpdatedAtDateTime(self):
-        testTicket = mock()
-        item = JiraTrackerItem(testTicket)
-        self.assertEqual(str(testTicket.updated), str(item.updatedAt()))
+        testTicket = JiraTicket()
+        date = datetime.now()
+        testTicket.details_.updated = date
+        timezone = UTC()
+        item = JiraTrackerItem(testTicket, timezone)
+        self.assertEqual(date, item.updatedAt())
+        self.assertEqual(None, item.updatedAt().tzinfo)
         
     def test_settingJiraKeyDoesNotChangeUnderlying(self):
         testTicket = mock()

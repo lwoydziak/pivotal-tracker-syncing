@@ -8,6 +8,8 @@ from pivotaltrackeritem import PivotalTrackerItem
 from pytracker import Story
 from mockito.mocking import mock
 from mockito.mockito import when
+from datetime import timedelta
+from timezoneutc import UTC
 
 
 class PivotalTrackerItem_Tests(unittest.TestCase):
@@ -200,8 +202,10 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
     def test_canGetTimeUpdatedAt(self):
         story = Story()
         story.updated_at = 1240433216
-        item = PivotalTrackerItem(story)
+        timezone = UTC()
+        item = PivotalTrackerItem(story, timezone)
         self.assertEqual("2009/04/22 20:46:56", item.updatedAt().strftime("%Y/%m/%d %H:%M:%S"))
+        self.assertEqual(None, item.updatedAt().tzinfo)
         
     def test_whenCommentAddedStoryIsAvailableToUpdate(self):
         story = Story()

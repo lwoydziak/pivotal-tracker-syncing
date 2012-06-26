@@ -29,7 +29,7 @@ class BaseStatus(object):
     def __eq__(self, other):
         if other is self:
             return True
-        if isinstance(other, self.__class__):
+        if isinstance(other, BaseStatus):
             return self.pivotal() == other.pivotal() and self.jira() == other.jira()
         return False
 

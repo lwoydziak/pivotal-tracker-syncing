@@ -3,6 +3,7 @@ Created on Mar 29, 2012
 
 @author: lwoydziak
 '''
+from timezoneutc import UTC
 
 class Tracker(object):
     '''
@@ -61,6 +62,7 @@ class Tracker(object):
     def update(self, item):
         if not self.valid(): 
             raise ValueError()
+        return item
     
     def delete(self, item):
         if not self.valid():
@@ -74,8 +76,8 @@ class Tracker(object):
     def _deleteById(self, itemId):
         pass
  
-    def _convertToItem(self, typeName, contents):
-        return typeName(contents)
+    def _convertToItem(self, typeName, contents, timezone=UTC()):
+        return typeName(contents,timezone)
     
     
     

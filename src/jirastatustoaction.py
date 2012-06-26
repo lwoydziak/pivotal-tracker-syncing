@@ -15,13 +15,14 @@ class JiraStatusToAction(object):
         '''
         Constructor
         '''
+        DefaultAction = namedtuple("DefaultAction", ["id"])
+        self.action_ = DefaultAction(None)
+        
         if actions is None:
-            DefaultAction = namedtuple("DefaultAction", ["id"])
-            self.action_ = DefaultAction(None)
             return
         
         for action in actions:
-            if status.jira() in str(action.name):
+            if str(status.jira()) in str(action.name):
                 self.action_ = action
                 break
         

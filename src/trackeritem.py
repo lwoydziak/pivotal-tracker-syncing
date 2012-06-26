@@ -40,6 +40,7 @@ class TrackerItem(object):
         self.withSummary(item.summary())
         self.withComments(item.comments())
         self.withType(item.type())
+        self.withStatus(item.status())
         item.copyTypeSpecificDataTo(self)
         pass
     
@@ -74,6 +75,9 @@ class TrackerItem(object):
     
     def type(self):
         return self.type_
+    
+    def _convertToUtc(self, dateTime):
+        return (dateTime + dateTime.utcoffset()).replace(tzinfo=None)
     
     
     

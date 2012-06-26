@@ -8,6 +8,7 @@ from trackeritem import TrackerItem
 from mockito.mocking import mock
 from mockito.mockito import verify, when
 from trackeritemstatus import TrackerItemStatus
+from mockito.matchers import any
 
 class TrackerItemTests(unittest.TestCase):
     def test_canConstructTestItem(self):
@@ -118,7 +119,38 @@ class TrackerItemTests(unittest.TestCase):
         item1 = TrackerItem().withType(type)
         item2 = TrackerItem().withType(typeB)
         item2.syncWith(item1)
-        self.assertEqual(type, item2.type())        
+        self.assertEqual(type, item2.type())
+        
+    def test_canSyncStatus(self):
+        statusA = TrackerItemStatus()
+        statusB = TrackerItemStatus()
+        item1 = TrackerItem().withStatus(statusA)
+        item2 = TrackerItem().withStatus(statusB)
+        item2.syncWith(item1)
+        syncedStatus = item2.status()
+        self.assertTrue(syncedStatus is statusA)
+        
+    def test_canGetUtcTime(self):
+        class testing(object):
+            def __init__(self, mocking):
+                self.mocking_ = mocking
+            
+            def __add__(self, other):
+                return self.mocking_.add(other)
+            
+            def utcoffset(self):
+                return self.mocking_.utcoffset()
+                
+        item = TrackerItem()
+        dateTime = mock()
+        testDateTime = testing(dateTime)
+        deltaTime = mock()
+        finalTime = mock()
+        when(dateTime).utcoffset().thenReturn(deltaTime)
+        when(dateTime).add(deltaTime).thenReturn(finalTime)
+        when(finalTime).replace(tzinfo=None).thenReturn(1)
+        newDateTime = item._convertToUtc(testDateTime)
+        self.assertEqual(newDateTime, 1)     
                 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

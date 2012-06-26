@@ -6,6 +6,7 @@ Created on Mar 24, 2012
 import pytracker
 from tracker import Tracker
 from pivotaltrackeritem import PivotalTrackerItem
+from timezoneutc import UTC
 
 class PivotalTrackerFor(Tracker):
     '''
@@ -38,7 +39,7 @@ class PivotalTrackerFor(Tracker):
                 break
             times = times-1
         for story in stories:
-            yield self._convertToItem(PivotalTrackerItem, story)
+            yield self._convertToItem(PivotalTrackerItem, story, UTC())
     
     def _tryToGetStories(self, forFilter=None):
         try: 
@@ -55,7 +56,8 @@ class PivotalTrackerFor(Tracker):
         else:
             story = self.trackerInstance_.UpdateStory(item.decoratedStory())
         updatedItem = PivotalTrackerItem(story).withComments(item.comments('new'))
-        self.updateCommentsFor(updatedItem)        
+        # to be fully complete updatedItem also needs exisiting comments - tbd
+        return self.updateCommentsFor(updatedItem)       
         
     def _deleteById(self, itemId):
         if itemId is None:
@@ -69,6 +71,9 @@ class PivotalTrackerFor(Tracker):
         return item
     
     def updateCommentsFor(self, item):
-        for comment in item.comments('new'):
+        comments = item.comments('new')
+        for comment in comments[:]:
             if len(comment) < self.MAX_COMMENT_LENGTH:
                 self.trackerInstance_.AddComment(item.Id(), comment)
+            #now comments in the new should be moved to existing - tbd
+        return item

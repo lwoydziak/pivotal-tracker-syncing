@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, "src")
 from jiratracker import JiraTracker
 from mappivotaltojirastatus import PivotalToJiraStatusMap
+from trackeritemstatus import TrackerItemStatus
 
 
 
@@ -23,6 +24,7 @@ class JiraAccpetanceTest(unittest.TestCase):
     
     def tearDown(self):
         self.jira_.deleteAllItems()
+        PivotalToJiraStatusMap().reset()
         unittest.TestCase.tearDown(self)
     
     def test_canConnectToJira(self):
@@ -79,24 +81,18 @@ class JiraAccpetanceTest(unittest.TestCase):
         item = next(tracker.items())
         self.assertEqual(item.comments()[0], aComment)
 
-    def mapStatuses(self, tracker):
-        statuses = tracker.getAvailableStatuses()
-        PivotalToJiraStatusMap().addMapping(jira="Closed", pivotal="Accepted")
-        PivotalToJiraStatusMap().addMapping(jira="New", pivotal="Not Yet Started")
-        PivotalToJiraStatusMap().insert(statuses)
-   
     def test_canGetAvailableStatusesForJira(self):
         tracker = self.jira_
-        self.mapStatuses(tracker)
+        Testing.mapStatuses(tracker)
         self.assertEqual(len(PivotalToJiraStatusMap()), 2)
         
     def test_canAdjustStateOfTicket(self):
         tracker = self.jira_
-        self.mapStatuses(tracker)
+        Testing.mapStatuses(tracker)
         item = jiraItemFactory(Env().jiraProject, "test_canAdjustStateOfTicket-1", "can change the status of this ticket?")
         Testing.putItemToTrackerAndChangeStatusToDone(item, tracker)
         item = next(tracker.items())
-        self.assertEqual(item.status(), status)
+        self.assertEqual(item.status(), TrackerItemStatus("accepted"))
 
     def test_canFilterTicketsReturnedFromJiraSoNoMatchesAreFound(self):
         tracker = self.jira_
