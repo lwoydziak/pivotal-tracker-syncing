@@ -150,7 +150,13 @@ class TrackerItemTests(unittest.TestCase):
         when(dateTime).add(deltaTime).thenReturn(finalTime)
         when(finalTime).replace(tzinfo=None).thenReturn(1)
         newDateTime = item._convertToUtc(testDateTime)
-        self.assertEqual(newDateTime, 1)     
+        self.assertEqual(newDateTime, 1)  
+        
+    def test_canAddRequestor(self):
+        item = TrackerItem()
+        requestor = "me"
+        item.withRequestor(requestor)
+        self.assertEqual(requestor, item.requestor())   
                 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

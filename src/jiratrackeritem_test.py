@@ -203,6 +203,22 @@ class JiraTrackerItem_Test(unittest.TestCase):
     def test_jiraItemTypeIsBug(self):
         item = JiraTrackerItem()
         self.assertEqual("bug", item.type())
+        
+    def test_canChangeReporter(self):
+        item = JiraTrackerItem()
+        reporter = "me"
+        item.withRequestor(reporter)
+        self.assertEqual(reporter, item.requestor())
+        self.assertEqual(reporter, item.underlying().reporter())
+        self.assertEqual(item.piecesToUpdate(), [{'id':"reporter" , 'values':[reporter,]}])
+        
+    def test_doNotAddDuplicateReporter(self):
+        testTicket = mock()
+        item = JiraTrackerItem(testTicket)
+        item.withRequestor(testTicket.reporter) 
+        self.assertEqual(item.piecesToUpdate(), [])
+        
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

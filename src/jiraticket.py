@@ -45,6 +45,18 @@ class JiraTicket(object):
 
     def updatedAt(self):
         return self.details_.updated
+
+    
+    def reporter(self):
+        return self.details_.reporter
+
+    
+    def setReporter(self, reporter):
+        self.details_.reporter = reporter
+    
+    
+    
+    
     
     
     

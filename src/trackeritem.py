@@ -16,6 +16,7 @@ class TrackerItem(object):
         self.description_ = None
         self.status_ = None
         self.type_ = None
+        self.requestor_ = None
         self.comments_ = {'new':[], 'existing':[]}
         
     def withSummary(self, summary):
@@ -79,7 +80,12 @@ class TrackerItem(object):
     def _convertToUtc(self, dateTime):
         return (dateTime + dateTime.utcoffset()).replace(tzinfo=None)
     
+    def withRequestor(self, requestor):
+        self.requestor_ = requestor
+        return self
     
+    def requestor(self):
+        return self.requestor_
     
 
         

@@ -24,6 +24,7 @@ class JiraTrackerItem(TrackerItem):
         self.withSummary(self.ticket_.summary())
         self.withStatus(TrackerItemStatus(self.ticket_))
         self.withType("bug")
+        self.withRequestor(self.ticket_.reporter())
         self.timezone_ = timezone
         self.piecesToUpdate_ = []
        
@@ -94,6 +95,17 @@ class JiraTrackerItem(TrackerItem):
     def updatedAt(self):
         dateAndTime = deepcopy(self.underlying().updatedAt()).replace(tzinfo=self.timezone_)
         return self._convertToUtc(dateAndTime)
+
+    
+    def withRequestor(self, requestor):
+        if self.requestor() == requestor:
+            return
+        super(JiraTrackerItem, self).withRequestor(requestor)
+        self.ticket_.setReporter(requestor)
+        self.piecesToUpdate_.append({'id':"reporter", 'values':[requestor,]})
+        return self
+    
+    
     
     
     

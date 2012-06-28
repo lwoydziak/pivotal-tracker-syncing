@@ -129,8 +129,12 @@ class JiraAccpetanceTest(unittest.TestCase):
         item = next(tracker.items())
         self.assertEqual(item.status(), TrackerItemStatus("started"))
 
-    def test_pass(self):
-        pass
+    def test_canGetReporter(self):
+        tracker = self.jira_
+        item = jiraItemFactory(Env().jiraProject, "test_canMoveNewStateToInWork-1", "can change the status to In Work?")
+        tracker.update(item)
+        item = next(tracker.items())
+        self.assertEqual(Env().jiraUsername, item.requestor())
        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_canConnectToPivotalTrackerTestProject']
