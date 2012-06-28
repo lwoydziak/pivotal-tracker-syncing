@@ -279,6 +279,26 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
         self.assertEqual(story.GetStoryType(), defaultStoryType)
         self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)
         
+    def test_canSetRequestor(self):
+        item = PivotalTrackerItem()
+        requestor = "me"
+        item.withRequestor(requestor)
+        self.assertEqual(requestor, item.requestor())
+        self.assertEqual(requestor, item.underlying().GetRequestedBy())
+        self.assertTrue('requested_by' in item.decoratedStory().UPDATE_FIELDS)
+        
+    def test_cannotSetRequestorTypeForStory(self):
+        story = Story()
+        requestor = "me"
+        story.SetRequestedBy(requestor)
+        item = PivotalTrackerItem(story)
+        item.withRequestor(requestor)
+        self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)      
+        
+            
+ 
+
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

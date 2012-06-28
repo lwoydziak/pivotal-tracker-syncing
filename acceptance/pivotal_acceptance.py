@@ -143,7 +143,15 @@ class PivotalAcceptanceTest(unittest.TestCase):
         item = PivotalTrackerItem().withSummary("test_canAdjustStateOfTicket-1").withDescription("can change the status of this ticket?").withType("bug")  
         done = Testing.putItemToTrackerAndChangeStatusTo("accepted", item, tracker)
         item = next(tracker.items())
-        self.assertEqual(item.status(), done)        
+        self.assertEqual(item.status(), done)       
+
+    def test_canGetRequestor(self):
+        tracker = self.pivotal_
+        item = PivotalTrackerItem().withSummary("test_canGetRequestor-1").withDescription("can change the requestor of this ticket?")  
+        tracker.update(item)
+        item = next(tracker.items())
+        self.assertEqual("Woydziak", item.requestor())       
+        
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_canConnectToPivotalTrackerTestProject']
