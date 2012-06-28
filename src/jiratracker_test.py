@@ -295,8 +295,16 @@ class JiraTracker_Test(unittest.TestCase):
         jiraInstance = self.getMockFor(jira)
         timezone = mock()
         jira.setTimezone(timezone)
-        self.assertEqual(timezone, jira.timezone()) 
+        self.assertEqual(timezone, jira.timezone())
         
+    def test_whenNoActionAvaiableDoNotSetStatus(self):
+        jira = JiraTracker()
+        jiraInstance = self.getMockFor(jira)
+        trackerItem = mock()
+        tracerBullet = "hello"
+        when(trackerItem).underlying().thenReturn(tracerBullet)
+        bullet = jira._ticketWithUpdatedStatusFrom(trackerItem)
+        self.assertEqual(tracerBullet, bullet)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

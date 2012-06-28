@@ -21,10 +21,15 @@ class JiraStatusToAction(object):
         if actions is None:
             return
         
+        statuses = status.jira()
+        if statuses is None:
+            return
+        
         for action in actions:
-            if str(status.jira()) in str(action.name):
-                self.action_ = action
-                break
+            for status in statuses:
+                if str(status) in str(action.name):
+                    self.action_ = action
+                    return
         
     def Id(self):
         return self.action_.id

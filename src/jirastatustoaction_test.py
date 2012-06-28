@@ -16,15 +16,22 @@ class JiraStatusToActionTest(unittest.TestCase):
         status = mock()
         potentialAction = mock()
         actions = [potentialAction, ]
-        when(status).jira().thenReturn(str(potentialAction.name))
+        when(status).jira().thenReturn([str(potentialAction.name)])
         action = JiraStatusToAction(status, actions)
         self.assertEqual(str(potentialAction.id), str(action.Id()))
         pass
     
     def test_whenNoActionsGivenActionIdIsNone(self):
         status = mock()
-        action = JiraStatusToAction(status, None)
+        action = JiraStatusToAction(status, None)  
+        
+    def test_whenStatusIsNoneActionIdIsNone(self):
+        status = mock()
+        potentialAction = mock()
+        actions = [potentialAction, ]
+        action = JiraStatusToAction(status, actions)
         self.assertEqual(None, action.Id())
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

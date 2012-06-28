@@ -8,9 +8,7 @@ import sys
 from config import Env
 from acceptance_test_support import Testing, SingleJira
 from jiraitemfactory import jiraItemFactory
-from datetime import datetime, timedelta
 sys.path.insert(0, "src")
-from jiratracker import JiraTracker
 from mappivotaltojirastatus import PivotalToJiraStatusMap
 from trackeritemstatus import TrackerItemStatus
 
@@ -84,13 +82,13 @@ class JiraAccpetanceTest(unittest.TestCase):
     def test_canGetAvailableStatusesForJira(self):
         tracker = self.jira_
         Testing.mapStatuses(tracker)
-        self.assertEqual(len(PivotalToJiraStatusMap()), 2)
+        self.assertEqual(len(PivotalToJiraStatusMap()), 4)
         
     def test_canAdjustStateOfTicket(self):
         tracker = self.jira_
         Testing.mapStatuses(tracker)
         item = jiraItemFactory(Env().jiraProject, "test_canAdjustStateOfTicket-1", "can change the status of this ticket?")
-        Testing.putItemToTrackerAndChangeStatusToDone(item, tracker)
+        Testing.putItemToTrackerAndChangeStatusTo("accepted", item, tracker)
         item = next(tracker.items())
         self.assertEqual(item.status(), TrackerItemStatus("accepted"))
 
@@ -122,7 +120,17 @@ class JiraAccpetanceTest(unittest.TestCase):
         tracker.update(itemInJira)
         updatedItem = next(tracker.items())
         self.assertEquals(itemInJira.updatedAt(), updatedItem.updatedAt())
-        
+
+    def test_canMoveNewStateToInWork(self):
+        tracker = self.jira_
+        Testing.mapStatuses(tracker)
+        item = jiraItemFactory(Env().jiraProject, "test_canMoveNewStateToInWork-1", "can change the status to In Work?")
+        Testing.putItemToTrackerAndChangeStatusTo("started", item, tracker)
+        item = next(tracker.items())
+        self.assertEqual(item.status(), TrackerItemStatus("started"))
+
+    def test_pass(self):
+        pass
        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_canConnectToPivotalTrackerTestProject']

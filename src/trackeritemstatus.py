@@ -42,6 +42,6 @@ class PivotalStatus(BaseStatus):
     
 class JiraStatus(BaseStatus):  
     def pivotal(self):
-        return self.apiObject_.translateStatusTo('pivotal', self.seed_)
+        return self.apiObject_.translateStatusTo('pivotal', self.seed_[0]) if self.seed_ is not None else None
 
         

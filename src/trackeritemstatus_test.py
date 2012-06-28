@@ -20,12 +20,12 @@ class TrackerItemStatusTests(unittest.TestCase):
         closed = "Closed"
         ticket.setStatus(statusId)
         mapObject = mock()
-        when(mapObject).translateStatusTo('jiraStatusName', statusId).thenReturn(closed)
+        when(mapObject).translateStatusTo('jiraStatusName', statusId).thenReturn([closed])
         status = TrackerItemStatus(ticket, apiObject=mapObject)
         status.pivotal()
         inorder.verify(mapObject).translateStatusTo('jiraStatusName', statusId)
         inorder.verify(mapObject).translateStatusTo('pivotal', closed)
-        self.assertEqual(status.jira(), closed)
+        self.assertEqual(status.jira(), [closed])
 
     def test_whenSeedingWithPivotalStatus(self):
         pivotalStatus = "Started"

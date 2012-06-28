@@ -8,8 +8,8 @@ from datetime import timedelta, tzinfo
 import time
 
 class timeWrapper:
-    def __init__(self, time):
-        self.time = time
+    def __init__(self, timeInput):
+        self.time = timeInput
     
     def timezone(self):
         return self.time.timezone

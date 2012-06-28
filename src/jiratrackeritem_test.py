@@ -181,7 +181,7 @@ class JiraTrackerItem_Test(unittest.TestCase):
         testTicket = JiraTicket()
         testTicket.setStatus(jiraStatus.id)
         item = JiraTrackerItem(testTicket)
-        self.assertEqual(item.status().jira(), jiraStatus.name)
+        self.assertEqual(item.status().jira(), [jiraStatus.name])
         PivotalToJiraStatusMap().reset()
 
     def test_canGetUpdatedAtDateTime(self):

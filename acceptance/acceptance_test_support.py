@@ -35,10 +35,10 @@ class Testing(object):
         return aComment
     
     @staticmethod
-    def putItemToTrackerAndChangeStatusToDone(item, tracker):
+    def putItemToTrackerAndChangeStatusTo(status, item, tracker):
         tracker.update(item)
         item = next(tracker.items())
-        status = TrackerItemStatus("accepted")
+        status = TrackerItemStatus(status)
         item.withStatus(status)
         tracker.update(item)
         return status
@@ -48,6 +48,8 @@ class Testing(object):
         statuses = tracker.getAvailableStatuses()
         PivotalToJiraStatusMap().addMapping(jira="Closed", pivotal="accepted")
         PivotalToJiraStatusMap().addMapping(jira="New", pivotal="unscheduled")
+        PivotalToJiraStatusMap().addMapping(jira="In Work", pivotal="started")
+        PivotalToJiraStatusMap().addMapping(jira="In Work", transitionFrom="Assigned")
         PivotalToJiraStatusMap().insert(statuses)
     
 class SingleJira(object, metaclass=Singleton):
