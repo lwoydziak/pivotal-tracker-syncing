@@ -8,6 +8,7 @@ from jiraticket import JiraTicket
 from trackeritemstatus import TrackerItemStatus
 from defaultparameter import defaultParameter
 from copy import deepcopy
+from trackeritemuser import JiraUser
 
 class JiraTrackerItem(TrackerItem):
     '''
@@ -24,7 +25,7 @@ class JiraTrackerItem(TrackerItem):
         self.withSummary(self.ticket_.summary())
         self.withStatus(TrackerItemStatus(self.ticket_))
         self.withType("bug")
-        self.withRequestor(self.ticket_.reporter())
+        self.withRequestor(JiraUser(self.ticket_.reporter()))
         self.timezone_ = timezone
         self.piecesToUpdate_ = []
        
@@ -101,8 +102,8 @@ class JiraTrackerItem(TrackerItem):
         if self.requestor() == requestor:
             return
         super(JiraTrackerItem, self).withRequestor(requestor)
-        self.ticket_.setReporter(requestor)
-        self.piecesToUpdate_.append({'id':"reporter", 'values':[requestor,]})
+        self.ticket_.setReporter(requestor.jira())
+        self.piecesToUpdate_.append({'id':"reporter", 'values':[requestor.jira(),]})
         return self
     
     

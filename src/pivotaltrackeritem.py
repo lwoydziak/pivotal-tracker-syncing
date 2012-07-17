@@ -10,6 +10,7 @@ from defaultparameter import defaultParameter
 import re
 from datetime import datetime, tzinfo, timedelta
 from trackeritemstatus import TrackerItemStatus
+from trackeritemuser import PivotalUser
 
 class PivotalTrackerItem(TrackerItem):
     '''
@@ -27,7 +28,7 @@ class PivotalTrackerItem(TrackerItem):
         self._normalizeDescription(self.story_.GetDescription())
         self.withStatus(TrackerItemStatus(self.story_.GetCurrentState()))
         self.withType(self.story_.GetStoryType())
-        self.withRequestor(self.story_.GetRequestedBy())
+        self.withRequestor(PivotalUser(self.story_.GetRequestedBy()))
         self.timezone_ = timezone
         self._determineIfNeedToUpdate(story)
         
@@ -157,7 +158,7 @@ class PivotalTrackerItem(TrackerItem):
         if requestor == self.requestor() or requestor is None:
             return
         super(PivotalTrackerItem, self).withRequestor(requestor)
-        self.underlying().SetRequestedBy(requestor)
+        self.underlying().SetRequestedBy(requestor.pivotal())
         self._addFieldToUpdate('requested_by')
         return self
     

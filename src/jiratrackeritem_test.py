@@ -14,6 +14,7 @@ from trackeritemstatus import TrackerItemStatus
 from mappivotaltojirastatus import PivotalToJiraStatusMap
 from collections import namedtuple
 from timezoneutc import UTC
+from trackeritemuser import JiraUser
 
 JiraStatus = namedtuple('JiraStatus', ['id', 'name'])
 
@@ -207,15 +208,15 @@ class JiraTrackerItem_Test(unittest.TestCase):
     def test_canChangeReporter(self):
         item = JiraTrackerItem()
         reporter = "me"
-        item.withRequestor(reporter)
-        self.assertEqual(reporter, item.requestor())
+        item.withRequestor(JiraUser(reporter))
+        self.assertEqual(reporter, item.requestor().jira())
         self.assertEqual(reporter, item.underlying().reporter())
         self.assertEqual(item.piecesToUpdate(), [{'id':"reporter" , 'values':[reporter,]}])
         
     def test_doNotAddDuplicateReporter(self):
         testTicket = mock()
         item = JiraTrackerItem(testTicket)
-        item.withRequestor(testTicket.reporter) 
+        item.withRequestor(JiraUser(testTicket.reporter)) 
         self.assertEqual(item.piecesToUpdate(), [])
         
         

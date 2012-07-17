@@ -150,7 +150,7 @@ class PivotalAcceptanceTest(unittest.TestCase):
         item = PivotalTrackerItem().withSummary("test_canGetRequestor-1").withDescription("can change the requestor of this ticket?")  
         tracker.update(item)
         item = next(tracker.items())
-        self.assertEqual("Woydziak", item.requestor())       
+        self.assertTrue("Woydziak" in item.requestor().pivotal())       
         
         
 if __name__ == "__main__":

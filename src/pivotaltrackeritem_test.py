@@ -10,6 +10,7 @@ from mockito.mocking import mock
 from mockito.mockito import when
 from datetime import timedelta
 from timezoneutc import UTC
+from trackeritemuser import PivotalUser
 
 
 class PivotalTrackerItem_Tests(unittest.TestCase):
@@ -282,8 +283,8 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
     def test_canSetRequestor(self):
         item = PivotalTrackerItem()
         requestor = "me"
-        item.withRequestor(requestor)
-        self.assertEqual(requestor, item.requestor())
+        item.withRequestor(PivotalUser(requestor))
+        self.assertEqual(requestor, item.requestor().pivotal())
         self.assertEqual(requestor, item.underlying().GetRequestedBy())
         self.assertTrue('requested_by' in item.decoratedStory().UPDATE_FIELDS)
         
@@ -292,7 +293,7 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
         requestor = "me"
         story.SetRequestedBy(requestor)
         item = PivotalTrackerItem(story)
-        item.withRequestor(requestor)
+        item.withRequestor(PivotalUser(requestor))
         self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)      
         
             

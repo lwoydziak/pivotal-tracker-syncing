@@ -134,7 +134,7 @@ class JiraAccpetanceTest(unittest.TestCase):
         item = jiraItemFactory(Env().jiraProject, "test_canMoveNewStateToInWork-1", "can change the status to In Work?")
         tracker.update(item)
         item = next(tracker.items())
-        self.assertEqual(Env().jiraUsername, item.requestor())
+        self.assertEqual(Env().jiraUsername, item.requestor().jira())
        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_canConnectToPivotalTrackerTestProject']
