@@ -42,6 +42,7 @@ class TrackerItem(object):
         self.withComments(item.comments())
         self.withType(item.type())
         self.withStatus(item.status())
+        self.withRequestor(item.requestor())
         item.copyTypeSpecificDataTo(self)
         pass
     

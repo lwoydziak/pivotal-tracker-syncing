@@ -15,6 +15,7 @@ from jiraitemfactory import jiraItemFactory
 from pivotaltrackeritem import PivotalTrackerItem
 from trackersyncby import TrackerSyncBy
 from trackeritemstatus import TrackerItemStatus
+from trackeritemuser import JiraUser, PivotalUser 
 from mappivotaltojirastatus import PivotalToJiraStatusMap
 from unit_test_support import Testing
 from acceptance_test_support import Testing as AcceptanceTesting
@@ -27,6 +28,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.jira_ = SingleJira().instance()
         self.pivotal_ = SinglePivotal().instance()
         AcceptanceTesting.mapStatuses(self.jira_)
+        AcceptanceTesting.mapUsers()
         pass
 
     def tearDown(self):
@@ -131,6 +133,19 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.syncExistingItemFrom(jira, pivotal)
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.status(),status)
+        
+    def test_canSyncReporterToPivotalForExistingItems(self):
+        jira = self.jira_
+        pivotal = self.pivotal_
+        newJiraItem = jiraItemFactory(Env().jiraProject, "test_canSyncReporterToPivotalForExistingItems", "a test description")
+        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
+        jiraItem = next(jira.items())
+        user = JiraUser(Env().jiraOtherUser)
+        jiraItem.withRequestor(user)
+        jira.update(jiraItem)
+        self.syncExistingItemFrom(jira, toTracker=pivotal)
+        pivotalItem = next(pivotal.items())
+        self.assertEqual(pivotalItem.requestor(),user)
         
 
 if __name__ == "__main__":

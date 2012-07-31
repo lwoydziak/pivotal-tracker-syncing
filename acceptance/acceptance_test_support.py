@@ -11,6 +11,7 @@ from jiratracker import JiraTracker
 from pivotaltracker import PivotalTrackerFor
 from trackeritemstatus import TrackerItemStatus
 from mappivotaltojirastatus import PivotalToJiraStatusMap
+from mapusers import PivotalToJiraUserMap
 from timezonejira import JiraTimezone
 
 class Testing(object):
@@ -51,6 +52,11 @@ class Testing(object):
         PivotalToJiraStatusMap().addMapping(jira="In Work", pivotal="started")
         PivotalToJiraStatusMap().addMapping(jira="In Work", transitionFrom="Assigned")
         PivotalToJiraStatusMap().insert(statuses)
+        
+    @staticmethod
+    def mapUsers():
+        PivotalToJiraUserMap().addMapping(jira=Env().jiraUsername, pivotal=Env().pivotalTrackerUsername)
+        PivotalToJiraUserMap().addMapping(jira=Env().jiraOtherUser, pivotal=Env().pivotalTrackerOtherUser)
     
 class SingleJira(object, metaclass=Singleton):
     def __init__(self):
@@ -66,7 +72,7 @@ class SingleJira(object, metaclass=Singleton):
 class SinglePivotal(object, metaclass=Singleton):
     def __init__(self):
         tracker = PivotalTrackerFor(Env().pivotalTrackerProject)
-        tracker.loginAs(Env().pivotalTrackerUsername).withCredential(Env().pivotalTrackerPassword)
+        tracker.loginAs(Env().pivotalTrackerLogin).withCredential(Env().pivotalTrackerPassword)
         self.tracker_ = tracker
         
     def instance(self):

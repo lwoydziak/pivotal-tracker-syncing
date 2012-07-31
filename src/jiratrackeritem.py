@@ -3,7 +3,7 @@ Created on Apr 10, 2012
 
 @author: lwoydziak
 '''
-from trackeritem import TrackerItem
+from trackeritem import TrackerItem 
 from jiraticket import JiraTicket
 from trackeritemstatus import TrackerItemStatus
 from defaultparameter import defaultParameter

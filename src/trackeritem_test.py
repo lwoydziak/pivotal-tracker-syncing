@@ -8,6 +8,7 @@ from trackeritem import TrackerItem
 from mockito.mocking import mock
 from mockito.mockito import verify, when
 from trackeritemstatus import TrackerItemStatus
+from trackeritemuser import BaseUser
 from mockito.matchers import any
 
 class TrackerItemTests(unittest.TestCase):
@@ -156,7 +157,16 @@ class TrackerItemTests(unittest.TestCase):
         item = TrackerItem()
         requestor = "me"
         item.withRequestor(requestor)
-        self.assertEqual(requestor, item.requestor())   
+        self.assertEqual(requestor, item.requestor())
+        
+    def test_canSyncReporter(self):
+        userA = BaseUser()
+        userB = BaseUser()
+        item1 = TrackerItem().withRequestor(userA)
+        item2 = TrackerItem().withRequestor(userB)
+        item2.syncWith(item1)
+        syncedUser = item2.requestor()
+        self.assertTrue(syncedUser is userA)
                 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
