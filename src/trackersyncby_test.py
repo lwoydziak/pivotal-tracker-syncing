@@ -5,7 +5,7 @@ Created on May 30, 2012
 '''
 import unittest
 from mockito.mocking import mock
-from trackersyncby import TrackerSyncBy
+from trackersyncby import TrackerSyncBy, ForwardSync, ReverseSync
 from mockito.mockito import when, verify
 from mockito.matchers import any
 from mockito.verification import never
@@ -95,7 +95,7 @@ class TrackerSyncByTest(unittest.TestCase):
     def test_addCommentsAndUpdateIssue(self):
         toTracker = mock()
         itemToAddCommentsTo = mock()
-        itemToGetCommentsFrom = mock()
+        itemToGetCommentsFrom = mock() 
         syncCommentsFor = TrackerSyncBy.syncingItem()
         when(toTracker).items(None).thenReturn(Testing.MockIterator([itemToAddCommentsTo]))
         when(itemToAddCommentsTo).canBeSyncedWith(itemToGetCommentsFrom).thenReturn(True)
@@ -145,11 +145,11 @@ class TrackerSyncByTest(unittest.TestCase):
         verify(item, never).syncWith(any())
         verify(toTracker, never).update(item)
         
-    def setupSync(self):
+    def setupSync(self, syncDirection=ForwardSync):
         toTracker = mock()
         itemToSyncTo = mock()
         itemToSyncFrom = mock()
-        syncCommentsFor = TrackerSyncBy.syncingItem()
+        syncCommentsFor = TrackerSyncBy.syncingItem(Direction=syncDirection)
         when(toTracker).items(None).thenReturn(Testing.MockIterator([itemToSyncTo]))
         return toTracker, itemToSyncTo, itemToSyncFrom, syncCommentsFor
         
@@ -169,7 +169,17 @@ class TrackerSyncByTest(unittest.TestCase):
         when(itemToSyncTo).canBeSyncedWith(itemToSyncFrom).thenReturn(True)
         syncCommentsFor(itemToSyncFrom, toTracker)
         verify(toTracker, never).update(itemToSyncTo)
-
+        
+    def test_reverseSyncGetsItemToSyncToFromCorrectTracker(self):
+        toTracker, itemToSyncTo, itemToSyncFrom, syncCommentsFor = self.setupSync(ReverseSync)
+        fromTracker = mock()
+        when(fromTracker).items(None).thenReturn(Testing.MockIterator([itemToSyncTo]))
+        when(itemToSyncFrom).updatedAt().thenReturn(0)
+        when(itemToSyncTo).updatedAt().thenReturn(1)
+        when(itemToSyncFrom).canBeSyncedWith(itemToSyncTo).thenReturn(True)
+        syncCommentsFor(itemToSyncFrom, toTracker, fromTracker)
+        verify(itemToSyncFrom).syncWith(itemToSyncTo)
+        verify(fromTracker).update(itemToSyncFrom)
         
 
 if __name__ == "__main__":

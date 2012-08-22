@@ -12,6 +12,7 @@ from mockito.mockito import verify, when
 from mockito.mocking import mock
 from trackeritemstatus import TrackerItemStatus
 from mappivotaltojirastatus import PivotalToJiraStatusMap
+from mapusers import PivotalToJiraUserMap
 from collections import namedtuple
 from timezoneutc import UTC
 from trackeritemuser import JiraUser
@@ -206,7 +207,7 @@ class JiraTrackerItem_Test(unittest.TestCase):
         self.assertEqual("bug", item.type())
         
     def test_canChangeReporter(self):
-        item = JiraTrackerItem()
+        item = JiraTrackerItem()        
         reporter = "me"
         item.withRequestor(JiraUser(reporter))
         self.assertEqual(reporter, item.requestor().jira())
@@ -219,6 +220,25 @@ class JiraTrackerItem_Test(unittest.TestCase):
         item.withRequestor(JiraUser(testTicket.reporter)) 
         self.assertEqual(item.piecesToUpdate(), [])
         
+    def test_doNotOverwriteUnknownReporter(self):
+        PivotalToJiraUserMap().reset()
+        item = JiraTrackerItem()
+        reporter = "reporter"
+        item.withRequestor(JiraUser(reporter))
+        random = "me"
+        item.withRequestor(JiraUser(random))
+        self.assertNotEqual(random, item.requestor().jira())
+        self.assertEqual(reporter, item.requestor().jira())
+
+    def test_canOverwriteKnownReporter(self):
+        item = JiraTrackerItem()
+        reporter = "reporter"
+        PivotalToJiraUserMap().reset()
+        PivotalToJiraUserMap().addMapping(reporter, "anything")
+        item.withRequestor(JiraUser(reporter))
+        random = "me"
+        item.withRequestor(JiraUser(random))
+        self.assertEqual(random, item.requestor().jira())
         
 
 if __name__ == "__main__":

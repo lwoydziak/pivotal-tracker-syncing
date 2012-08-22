@@ -54,6 +54,20 @@ class TrackerItemUserTest(unittest.TestCase):
         statusEqual = JiraUser(jiraUser, apiObject=mapObject)
         self.assertTrue(status != statusEqual)
         self.assertTrue(status != "garbage")
+        
+    def test_isUnknownWhenOneIsNone(self):
+        user = JiraUser("blah")
+        self.assertTrue(user.unknown())
+        user = PivotalUser("blah")
+        self.assertTrue(user.unknown())
+        
+    def test_isKnownWhenAllAreNone(self):
+        user = BaseUser()
+        self.assertFalse(user.unknown())
+        
+    def test_isKnownWhenBothAreNotNone(self):
+        user = BaseUser("blah")
+        self.assertFalse(user.unknown())
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

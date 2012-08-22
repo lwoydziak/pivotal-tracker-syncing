@@ -22,7 +22,7 @@ class RemoteCustomFieldValue(object):
 
 class RemoteIssue(object):
     affectsVersions = []
-    assignee = ""
+    assignee = None
     attachmentNames = []
     components = []
     created = None
@@ -35,7 +35,7 @@ class RemoteIssue(object):
     key = None
     priority = ""
     project = None 
-    reporter = ""
+    reporter = None
     resolution = None
     status = ""
     summary = ""

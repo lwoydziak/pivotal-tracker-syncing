@@ -25,7 +25,14 @@ class BaseUser(object):
         return False
 
     def __ne__(self, other):
-        return not self.__eq__(other)    
+        return not self.__eq__(other)
+    
+    def unknown(self):
+        if self.jira() is None and self.pivotal() is None:
+            return False
+        if self.jira() is None or self.pivotal() is None:
+            return True
+        return False   
     
 class PivotalUser(BaseUser):
     def jira(self):

@@ -17,6 +17,7 @@ from trackersyncby import TrackerSyncBy
 from trackeritemstatus import TrackerItemStatus
 from trackeritemuser import JiraUser, PivotalUser 
 from mappivotaltojirastatus import PivotalToJiraStatusMap
+from mapusers import PivotalToJiraUserMap
 from unit_test_support import Testing
 from acceptance_test_support import Testing as AcceptanceTesting
 
@@ -35,6 +36,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.jira_.deleteAllItems()
         self.pivotal_.deleteAllItems()
         PivotalToJiraStatusMap().reset()
+        PivotalToJiraUserMap().reset()
         unittest.TestCase.tearDown(self)
 
     def syncNewItemToPivotal(self, newJiraItem, jira, pivotal):
@@ -146,6 +148,23 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.syncExistingItemFrom(jira, toTracker=pivotal)
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.requestor(),user)
+        
+    def test_doNotOverwriteJiraReporterWhenUnknown(self):
+		jira = self.jira_
+		pivotal = self.pivotal_
+		newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraReporterWhenUnknown", "a test description")
+		self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
+		jiraItem = next(jira.items())
+		user = JiraUser(Env().jiraOtherUser)
+		jiraItem.withRequestor(user)
+		jira.update(jiraItem)
+		PivotalToJiraUserMap().reset()
+		PivotalToJiraUserMap().addMapping(jira=Env().jiraUsername, pivotal=Env().pivotalTrackerUsername)
+		self.syncExistingItemFrom(jira, toTracker=pivotal)
+		self.syncExistingItemFrom(pivotal, toTracker=jira)
+		PivotalToJiraUserMap().addMapping(jira=Env().jiraOtherUser, pivotal=Env().pivotalTrackerOtherUser)
+		jiraItem = next(jira.items())
+		self.assertEqual(jiraItem.requestor(), user) 
         
 
 if __name__ == "__main__":

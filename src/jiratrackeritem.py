@@ -101,6 +101,8 @@ class JiraTrackerItem(TrackerItem):
     def withRequestor(self, requestor):
         if self.requestor() == requestor:
             return
+        if self.requestor() is not None and self.requestor().unknown():
+            return
         super(JiraTrackerItem, self).withRequestor(requestor)
         self.ticket_.setReporter(requestor.jira())
         self.piecesToUpdate_.append({'id':"reporter", 'values':[requestor.jira(),]})

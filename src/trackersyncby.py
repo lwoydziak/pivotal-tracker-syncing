@@ -7,7 +7,53 @@ from datetime import time
 
 def defaultFilter(item):
     return None
+
+class Sync(object):
+    def __init__(self):
+        self.filter_ = None
+        self.to_ = None
+        self.from_ = None
+        self.toTracker_ = None
+        self.fromTracker_ = None   
+
+    def needsSync(self):
+        toBeSyncedItemUpdated = self.from_.updatedAt()
+        toSyncWithItemUpdated = self.to_.updatedAt()
+        return toBeSyncedItemUpdated <= toSyncWithItemUpdated
     
+    def canSync(self):
+        return self.from_.canBeSyncedWith(self.to_)
+
+    def sync(self, FilteringOutCommentsFor): 
+        self.from_.syncWith(self.to_)
+        FilteringOutCommentsFor(self.from_)
+        self.toTracker_.update(self.from_)
+
+class ForwardSync(Sync):
+    def __init__(self, filter, given, gotFromTracker, getFromTracker):
+        super(ForwardSync, self).__init__()
+        self.filter_ = filter
+        self.to_ = given
+        self.from_ = None
+        self.toTracker_ = gotFromTracker
+        self.fromTracker_ = getFromTracker
+    
+    def obtainItem(self):
+        self.from_ = next(self.toTracker_.items(self.filter_(self.to_)))
+
+
+class ReverseSync(Sync):
+    def __init__(self, filter, given, gotFromTracker, getFromTracker):
+        super(ReverseSync, self).__init__()
+        self.filter_ = filter
+        self.to_ = None
+        self.from_ = given
+        self.toTracker_ = getFromTracker
+        self.fromTracker_ = gotFromTracker
+    
+    def obtainItem(self):
+        self.to_ =  next(self.toTracker_.items(self.filter_(self.from_)))
+
 
 class TrackerSyncBy(object):
     '''
@@ -31,20 +77,16 @@ class TrackerSyncBy(object):
                 newItem.syncWith(item)
                 toTracker.update(newItem)
         return addingItems_
-    
+       
     @staticmethod
-    def syncingItem(FilterForItem=defaultFilter, FilteringOutCommentsFor=defaultFilter):
-        def syncingDetails_(itemToSyncWith, toTracker):
-            forFilter = FilterForItem(itemToSyncWith)
+    def syncingItem(FilterForItem=defaultFilter, FilteringOutCommentsFor=defaultFilter, Direction=ForwardSync):
+        def syncingDetails_(given, toTracker, fromTracker=None):
+            syncer = Direction(FilterForItem, given, toTracker, fromTracker)
             try:
-                item = next(toTracker.items(forFilter))
+                syncer.obtainItem()
             except StopIteration:
                 return
             else:
-                itemUpdated =  item.updatedAt()
-                otherItemUpdated = itemToSyncWith.updatedAt()
-                if item.canBeSyncedWith(itemToSyncWith) and itemUpdated <= otherItemUpdated:
-                    item.syncWith(itemToSyncWith)
-                    FilteringOutCommentsFor(item)
-                    toTracker.update(item)
+                if syncer.canSync() and syncer.needsSync():
+                    syncer.sync(FilteringOutCommentsFor)
         return syncingDetails_
