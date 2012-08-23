@@ -48,7 +48,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         item = next(fromTracker.items())
         syncItem = TrackerSyncBy.syncingItem()
         syncItem(item, toTracker)
-        
+
     def test_newIssueInJiraIsCopiedToPivotal(self):
         jira = self.jira_
         pivotal = self.pivotal_
@@ -148,24 +148,23 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.syncExistingItemFrom(jira, toTracker=pivotal)
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.requestor(),user)
-        
+    
     def test_doNotOverwriteJiraReporterWhenUnknown(self):
-		jira = self.jira_
-		pivotal = self.pivotal_
-		newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraReporterWhenUnknown", "a test description")
-		self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
-		jiraItem = next(jira.items())
-		user = JiraUser(Env().jiraOtherUser)
-		jiraItem.withRequestor(user)
-		jira.update(jiraItem)
-		PivotalToJiraUserMap().reset()
-		PivotalToJiraUserMap().addMapping(jira=Env().jiraUsername, pivotal=Env().pivotalTrackerUsername)
-		self.syncExistingItemFrom(jira, toTracker=pivotal)
-		self.syncExistingItemFrom(pivotal, toTracker=jira)
-		PivotalToJiraUserMap().addMapping(jira=Env().jiraOtherUser, pivotal=Env().pivotalTrackerOtherUser)
-		jiraItem = next(jira.items())
-		self.assertEqual(jiraItem.requestor(), user) 
-        
+        jira = self.jira_
+        pivotal = self.pivotal_
+        newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraReporterWhenUnknown", "a test description")
+        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
+        jiraItem = next(jira.items())
+        user = JiraUser(Env().jiraOtherUser)
+        jiraItem.withRequestor(user)
+        jira.update(jiraItem)
+        PivotalToJiraUserMap().reset()
+        PivotalToJiraUserMap().addMapping(jira=Env().jiraUsername, pivotal=Env().pivotalTrackerUsername)
+        self.syncExistingItemFrom(jira, toTracker=pivotal)
+        self.syncExistingItemFrom(pivotal, toTracker=jira)
+        PivotalToJiraUserMap().addMapping(jira=Env().jiraOtherUser, pivotal=Env().pivotalTrackerOtherUser)
+        jiraItem = next(jira.items())
+        self.assertEqual(jiraItem.requestor(), user)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
