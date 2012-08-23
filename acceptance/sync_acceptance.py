@@ -136,15 +136,20 @@ class SyncAcceptanceTest(unittest.TestCase):
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.status(),status)
         
-    def test_canSyncReporterToPivotalForExistingItems(self):
-        jira = self.jira_
-        pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_canSyncReporterToPivotalForExistingItems", "a test description")
+
+    def getOtherUserAfterUpdatingJiraItem(self, jira, pivotal, newJiraItem):
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         jiraItem = next(jira.items())
         user = JiraUser(Env().jiraOtherUser)
         jiraItem.withRequestor(user)
         jira.update(jiraItem)
+        return user
+
+    def test_canSyncReporterToPivotalForExistingItems(self):
+        jira = self.jira_
+        pivotal = self.pivotal_
+        newJiraItem = jiraItemFactory(Env().jiraProject, "test_canSyncReporterToPivotalForExistingItems", "a test description")
+        user = self.getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
         self.syncExistingItemFrom(jira, toTracker=pivotal)
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.requestor(),user)
@@ -153,11 +158,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         jira = self.jira_
         pivotal = self.pivotal_
         newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraReporterWhenUnknown", "a test description")
-        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
-        jiraItem = next(jira.items())
-        user = JiraUser(Env().jiraOtherUser)
-        jiraItem.withRequestor(user)
-        jira.update(jiraItem)
+        user = self.getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
         PivotalToJiraUserMap().reset()
         PivotalToJiraUserMap().addMapping(jira=Env().jiraUsername, pivotal=Env().pivotalTrackerUsername)
         self.syncExistingItemFrom(jira, toTracker=pivotal)
