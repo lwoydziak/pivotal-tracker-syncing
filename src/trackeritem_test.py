@@ -174,14 +174,14 @@ class TrackerItemTests(unittest.TestCase):
         item.withOwner(owner)
         self.assertEqual(owner, item.owner())
         
-#    def test_canSyncOwner(self):
-#        userA = BaseUser()
-#        userB = BaseUser()
-#        item1 = TrackerItem().withOwner(userA)
-#        item2 = TrackerItem().withOwner(userB)
-#        item2.syncWith(item1)
-#        syncedUser = item2.owner()
-#        self.assertTrue(syncedUser is userA)
+    def test_canSyncOwner(self):
+        userA = BaseUser()
+        userB = BaseUser()
+        item1 = TrackerItem().withOwner(userA)
+        item2 = TrackerItem().withOwner(userB)
+        item2.syncWith(item1)
+        syncedUser = item2.owner()
+        self.assertTrue(syncedUser is userA)
                 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

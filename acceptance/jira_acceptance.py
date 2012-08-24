@@ -10,7 +10,9 @@ from acceptance_test_support import Testing, SingleJira
 from jiraitemfactory import jiraItemFactory
 sys.path.insert(0, "src")
 from mappivotaltojirastatus import PivotalToJiraStatusMap
+from mapusers import PivotalToJiraUserMap
 from trackeritemstatus import TrackerItemStatus
+from trackeritemuser import JiraUser
 
 
 
@@ -131,10 +133,43 @@ class JiraAccpetanceTest(unittest.TestCase):
 
     def test_canGetReporter(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canMoveNewStateToInWork-1", "can change the status to In Work?")
+        item = jiraItemFactory(Env().jiraProject, "test_canGetReporter-1", "can get reporter")
         tracker.update(item)
         item = next(tracker.items())
         self.assertEqual(Env().jiraUsername, item.requestor().jira())
+        
+    def test_canSetReporter(self):
+        Testing.mapUsers()
+        tracker = self.jira_
+        item = jiraItemFactory(Env().jiraProject, "test_canSetReporter-1", "can set reporter")
+        tracker.update(item)
+        item = next(tracker.items())
+        user = JiraUser(Env().jiraOtherUser)
+        item.withRequestor(user)
+        tracker.update(item)
+        item = next(tracker.items())
+        self.assertEqual(Env().jiraOtherUser, item.requestor().jira())
+        PivotalToJiraUserMap().reset()
+        
+    def test_canGetAssignee(self):
+        tracker = self.jira_
+        item = jiraItemFactory(Env().jiraProject, "test_canGetAssignee-1", "can get assignee")
+        tracker.update(item)
+        item = next(tracker.items())
+        self.assertEqual(Env().jiraUsername, item.owner().jira())
+        
+    def test_canSetAssignee(self):
+        Testing.mapUsers()
+        tracker = self.jira_
+        item = jiraItemFactory(Env().jiraProject, "test_canSetAssignee-1", "can set assignee")
+        tracker.update(item)
+        item = next(tracker.items())
+        user = JiraUser(Env().jiraOtherUser)
+        item.withOwner(user)
+        tracker.update(item)
+        item = next(tracker.items())
+        self.assertEqual(Env().jiraOtherUser, item.owner().jira())
+        PivotalToJiraUserMap().reset()
        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_canConnectToPivotalTrackerTestProject']

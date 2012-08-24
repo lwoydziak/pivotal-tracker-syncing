@@ -67,6 +67,18 @@ class JiraTicket_Test(unittest.TestCase):
         reporter = "me"
         ticket.setReporter(reporter)
         self.assertEqual(reporter, ticket.reporter())
+        
+    def test_canGetAssignee(self):
+        testTicket = testRemoteIssueFactory()
+        ticket = JiraTicket(testTicket)
+        self.assertEqual(testTicket.assignee, ticket.assignee())
+        
+    def test_canUpdateAssignee(self):
+        testTicket = testRemoteIssueFactory()
+        ticket = JiraTicket(testTicket)
+        assignee = "me"
+        ticket.setAssignee(assignee)
+        self.assertEqual(assignee, ticket.assignee())
 
 def testRemoteIssueFactory():
     testRemoteVersion = RemoteVersion()

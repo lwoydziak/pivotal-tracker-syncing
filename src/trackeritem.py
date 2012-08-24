@@ -44,6 +44,7 @@ class TrackerItem(object):
         self.withType(item.type())
         self.withStatus(item.status())
         self.withRequestor(item.requestor())
+        self.withOwner(item.owner())
         item.copyTypeSpecificDataTo(self)
         pass
     

@@ -240,6 +240,40 @@ class JiraTrackerItem_Test(unittest.TestCase):
         item.withRequestor(JiraUser(random))
         self.assertEqual(random, item.requestor().jira())
         
+    def test_canChangeAssignee(self):
+        item = JiraTrackerItem()        
+        assignee = "me"
+        item.withOwner(JiraUser(assignee))
+        self.assertEqual(assignee, item.owner().jira())
+        self.assertEqual(assignee, item.underlying().assignee())
+        self.assertEqual(item.piecesToUpdate(), [{'id':"assignee" , 'values':[assignee,]}])
+        
+    def test_doNotAddDuplicateAssignee(self):
+        testTicket = mock()
+        item = JiraTrackerItem(testTicket)
+        item.withOwner(JiraUser(testTicket.assignee)) 
+        self.assertEqual(item.piecesToUpdate(), [])
+        
+    def test_doNotOverwriteUnknownAssignee(self):
+        PivotalToJiraUserMap().reset()
+        item = JiraTrackerItem()
+        assignee = "assignee"
+        item.withOwner(JiraUser(assignee))
+        random = "me"
+        item.withOwner(JiraUser(random))
+        self.assertNotEqual(random, item.owner().jira())
+        self.assertEqual(assignee, item.owner().jira())
+
+    def test_canOverwriteKnownAssignee(self):
+        item = JiraTrackerItem()
+        assignee = "assignee"
+        PivotalToJiraUserMap().reset()
+        PivotalToJiraUserMap().addMapping(assignee, "anything")
+        item.withOwner(JiraUser(assignee))
+        random = "me"
+        item.withOwner(JiraUser(random))
+        self.assertEqual(random, item.owner().jira())
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
