@@ -29,6 +29,7 @@ class PivotalTrackerItem(TrackerItem):
         self.withStatus(TrackerItemStatus(self.story_.GetCurrentState()))
         self.withType(self.story_.GetStoryType())
         self.withRequestor(PivotalUser(self.story_.GetRequestedBy()))
+        self.withOwner(PivotalUser(self.story_.GetOwnedBy()))
         self.timezone_ = timezone
         self._determineIfNeedToUpdate(story)
         
@@ -162,6 +163,13 @@ class PivotalTrackerItem(TrackerItem):
         self._addFieldToUpdate('requested_by')
         return self
     
+    def withOwner(self, owner):
+        if owner == self.owner() or owner is None:
+            return
+        super(PivotalTrackerItem, self).withOwner(owner)
+        self.underlying().SetOwnedBy(owner.pivotal())
+        self._addFieldToUpdate('owned_by')
+        return self
     
     
         

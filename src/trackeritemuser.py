@@ -21,7 +21,8 @@ class BaseUser(object):
         if other is self:
             return True
         if isinstance(other, BaseUser):
-            return self.pivotal() == other.pivotal() and self.jira() == other.jira()
+            if self.pivotal() == other.pivotal():
+                return self.jira() == other.jira()
         return False
 
     def __ne__(self, other):

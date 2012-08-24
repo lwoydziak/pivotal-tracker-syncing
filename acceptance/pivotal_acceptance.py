@@ -12,6 +12,7 @@ sys.path.insert(0, "src")
 from pivotaltrackeritem import PivotalTrackerItem
 from pivotaltracker import PivotalTrackerFor
 from pytracker import Story
+from trackeritemuser import PivotalUser
 
 
 
@@ -147,10 +148,32 @@ class PivotalAcceptanceTest(unittest.TestCase):
 
     def test_canGetRequestor(self):
         tracker = self.pivotal_
-        item = PivotalTrackerItem().withSummary("test_canGetRequestor-1").withDescription("can change the requestor of this ticket?")  
+        item = PivotalTrackerItem().withSummary("test_canGetRequestor-1").withDescription("can get the requestor of this ticket?")  
         tracker.update(item)
         item = next(tracker.items())
         self.assertTrue("Woydziak" in item.requestor().pivotal())       
+        
+    def test_canChangeRequestor(self):
+        tracker = self.pivotal_
+        item = PivotalTrackerItem().withSummary("test_canChangeRequestor-1").withDescription("can change the requestor of this ticket?")  
+        tracker.update(item)
+        item = next(tracker.items())
+        newRequestor = PivotalUser(Env().pivotalTrackerOtherUser)
+        item.withRequestor(newRequestor)
+        tracker.update(item)
+        item = next(tracker.items())
+        self.assertTrue("Test User" in item.requestor().pivotal())
+        
+    def test_canChangeOwner(self):
+        tracker = self.pivotal_
+        item = PivotalTrackerItem().withSummary("test_canChangeOwner-1").withDescription("can change the owner of this ticket?").withType("bug")  
+        Testing.putItemToTrackerAndChangeStatusTo("started", item, tracker)
+        item = next(tracker.items())
+        newOwner = PivotalUser(Env().pivotalTrackerOtherUser)
+        item.withOwner(newOwner)
+        tracker.update(item)
+        item = next(tracker.items())
+        self.assertTrue("Test User" in item.owner().pivotal())   
         
         
 if __name__ == "__main__":

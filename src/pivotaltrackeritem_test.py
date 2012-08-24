@@ -288,17 +288,29 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
         self.assertEqual(requestor, item.underlying().GetRequestedBy())
         self.assertTrue('requested_by' in item.decoratedStory().UPDATE_FIELDS)
         
-    def test_cannotSetRequestorTypeForStory(self):
+    def test_cannotSetRequestorForStory(self):
         story = Story()
         requestor = "me"
         story.SetRequestedBy(requestor)
         item = PivotalTrackerItem(story)
         item.withRequestor(PivotalUser(requestor))
-        self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)      
+        self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)
         
-            
- 
-
+    def test_canSetOwner(self):
+        item = PivotalTrackerItem()
+        owner = "me"
+        item.withOwner(PivotalUser(owner))
+        self.assertEqual(owner, item.owner().pivotal())
+        self.assertEqual(owner, item.underlying().GetOwnedBy())
+        self.assertTrue('owned_by' in item.decoratedStory().UPDATE_FIELDS)
+        
+    def test_cannotSetOwnerForStory(self):
+        story = Story()
+        owner = "me"
+        story.SetOwnedBy(owner)
+        item = PivotalTrackerItem(story)
+        item.withOwner(PivotalUser(owner))
+        self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

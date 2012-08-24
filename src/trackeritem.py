@@ -17,6 +17,7 @@ class TrackerItem(object):
         self.status_ = None
         self.type_ = None
         self.requestor_ = None
+        self.owner_ = None
         self.comments_ = {'new':[], 'existing':[]}
         
     def withSummary(self, summary):
@@ -88,5 +89,10 @@ class TrackerItem(object):
     def requestor(self):
         return self.requestor_
     
-
+    def withOwner(self, owner):
+        self.owner_ = owner
+        return self
+    
+    def owner(self):
+        return self.owner_
         
