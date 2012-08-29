@@ -249,7 +249,6 @@ class PivotalTrackerItem_Tests(unittest.TestCase):
         self.assertEqual(startingStatus, item.status().pivotal())
         self.assertEqual([], item.decoratedStory().UPDATE_FIELDS)
         
-        
     def test_canSetTypeForStory(self):
         story = Story()
         defaultStoryType = "feature"

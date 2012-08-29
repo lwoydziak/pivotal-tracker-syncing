@@ -20,14 +20,10 @@ class Sync(object):
         toBeSyncedItemUpdated = self.from_.updatedAt()
         toSyncWithItemUpdated = self.to_.updatedAt()
         return toBeSyncedItemUpdated <= toSyncWithItemUpdated
+#        return True
     
     def canSync(self):
         return self.from_.canBeSyncedWith(self.to_)
-
-    def sync(self, FilteringOutCommentsFor): 
-        self.from_.syncWith(self.to_)
-        FilteringOutCommentsFor(self.from_)
-        self.toTracker_.update(self.from_)
 
 class ForwardSync(Sync):
     def __init__(self, filter, given, gotFromTracker, getFromTracker):
@@ -41,18 +37,28 @@ class ForwardSync(Sync):
     def obtainItem(self):
         self.from_ = next(self.toTracker_.items(self.filter_(self.to_)))
 
+    def sync(self, FilteringOutCommentsFor): 
+        self.from_.syncWith(self.to_)
+        FilteringOutCommentsFor(self.from_)
+        self.toTracker_.update(self.from_)
+
 
 class ReverseSync(Sync):
     def __init__(self, filter, given, gotFromTracker, getFromTracker):
         super(ReverseSync, self).__init__()
         self.filter_ = filter
-        self.to_ = None
-        self.from_ = given
+        self.to_ = given
+        self.from_ = None
         self.toTracker_ = getFromTracker
         self.fromTracker_ = gotFromTracker
     
     def obtainItem(self):
-        self.to_ =  next(self.toTracker_.items(self.filter_(self.from_)))
+        self.from_ =  next(self.fromTracker_.items(self.filter_(self.to_)))
+
+    def sync(self, FilteringOutCommentsFor): 
+        self.to_.syncWith(self.from_)
+        FilteringOutCommentsFor(self.to_)
+        self.toTracker_.update(self.to_)
 
 
 class TrackerSyncBy(object):

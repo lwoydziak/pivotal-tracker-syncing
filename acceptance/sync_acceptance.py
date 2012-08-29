@@ -49,6 +49,37 @@ class SyncAcceptanceTest(unittest.TestCase):
         item = next(fromTracker.items())
         syncItem = TrackerSyncBy.syncingItem()
         syncItem(item, toTracker)
+        
+    def create_getOtherUserAfterUpdatingJiraItem(self, attributeSetter):
+        def getOtherUserAfterUpdatingJiraItem_(jira, pivotal, newJiraItem):
+            self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
+            jiraItem = next(jira.items())
+            user = JiraUser(Env().jiraOtherUser)
+            attributeSetter(jiraItem, user)
+            jira.update(jiraItem)
+            return user
+        return getOtherUserAfterUpdatingJiraItem_
+    
+    def create_updatePivotalAndSyncJiraItem(self, attributeSetter):
+        def updatePivotalAndSyncJiraItem_(jira, pivotal):
+            item = next(pivotal.items())
+            attributeSetter(item, PivotalUser(Env().pivotalTrackerUsername))
+            pivotal.update(item)
+            item = next(pivotal.items())
+            attributeSetter(item, PivotalUser(None))
+            syncItem = TrackerSyncBy.syncingItem()
+            syncItem(item, jira)
+            return next(jira.items())
+        return updatePivotalAndSyncJiraItem_
+
+    def tryToSyncUnknownUser(self, jira, pivotal):
+        PivotalToJiraUserMap().reset()
+        PivotalToJiraUserMap().addMapping(jira=Env().jiraUsername, pivotal=Env().pivotalTrackerUsername)
+        self.syncExistingItemFrom(jira, toTracker=pivotal)
+        self.syncExistingItemFrom(pivotal, toTracker=jira)
+        PivotalToJiraUserMap().addMapping(jira=Env().jiraOtherUser, pivotal=Env().pivotalTrackerOtherUser)
+        jiraItem = next(jira.items())
+        return jiraItem
 
     def test_newIssueInJiraIsCopiedToPivotal(self):
         jira = self.jira_
@@ -136,17 +167,6 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.syncExistingItemFrom(jira, pivotal)
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.status(),status)
-        
-
-    def create_getOtherUserAfterUpdatingJiraItem(self, attributeSetter):
-        def getOtherUserAfterUpdatingJiraItem_(jira, pivotal, newJiraItem):
-            self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
-            jiraItem = next(jira.items())
-            user = JiraUser(Env().jiraOtherUser)
-            attributeSetter(jiraItem, user)
-            jira.update(jiraItem)
-            return user
-        return getOtherUserAfterUpdatingJiraItem_
 
     def test_canSyncReporterToPivotalForExistingItems(self):
         jira = self.jira_
@@ -157,15 +177,6 @@ class SyncAcceptanceTest(unittest.TestCase):
         self.syncExistingItemFrom(jira, toTracker=pivotal)
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.requestor(),user) 
-
-    def tryToSyncUnknownUser(self, jira, pivotal):
-        PivotalToJiraUserMap().reset()
-        PivotalToJiraUserMap().addMapping(jira=Env().jiraUsername, pivotal=Env().pivotalTrackerUsername)
-        self.syncExistingItemFrom(jira, toTracker=pivotal)
-        self.syncExistingItemFrom(pivotal, toTracker=jira)
-        PivotalToJiraUserMap().addMapping(jira=Env().jiraOtherUser, pivotal=Env().pivotalTrackerOtherUser)
-        jiraItem = next(jira.items())
-        return jiraItem
 
     def test_doNotOverwriteJiraReporterWhenUnknown(self):
         jira = self.jira_
@@ -194,6 +205,29 @@ class SyncAcceptanceTest(unittest.TestCase):
         user = getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
         jiraItem = self.tryToSyncUnknownUser(jira, pivotal)
         self.assertEqual(jiraItem.owner(), user)
+
+      
+    def test_doNotOverwriteJiraReporterWhenUnassignedInPivotal(self):
+        jira = self.jira_
+        pivotal = self.pivotal_
+        newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraReporterWhenUnassignedInPivotal", "a test description")
+        newJiraItem.withRequestor(PivotalUser(Env().pivotalTrackerOtherUser))
+        getOtherUserAfterUpdatingJiraItem = self.create_getOtherUserAfterUpdatingJiraItem(JiraTrackerItem.withRequestor)
+        user = getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
+        updatePivotalAndSyncJiraItem = self.create_updatePivotalAndSyncJiraItem(PivotalTrackerItem.withRequestor)
+        jiraItem = updatePivotalAndSyncJiraItem(jira, pivotal)
+        self.assertEqual(jiraItem.requestor(), user)
+
+    def test_doNotOverwriteJiraOwnerWhenUnassignedInPivotal(self):
+        jira = self.jira_
+        pivotal = self.pivotal_
+        newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraOwnerWhenUnassignedInPivotal", "a test description")
+        newJiraItem.withOwner(PivotalUser(Env().pivotalTrackerOtherUser))
+        getOtherUserAfterUpdatingJiraItem = self.create_getOtherUserAfterUpdatingJiraItem(JiraTrackerItem.withRequestor)
+        user = getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
+        updatePivotalAndSyncJiraItem = self.create_updatePivotalAndSyncJiraItem(PivotalTrackerItem.withOwner)
+        jiraItem = updatePivotalAndSyncJiraItem(jira, pivotal)
+        self.assertEqual(jiraItem.owner(), user)    
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

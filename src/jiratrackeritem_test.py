@@ -208,9 +208,11 @@ class JiraTrackerItem_Test(unittest.TestCase):
         
     def test_canChangeReporter(self):
         item = JiraTrackerItem()        
+        requestor = mock()
         reporter = "me"
-        item.withRequestor(JiraUser(reporter))
-        self.assertEqual(reporter, item.requestor().jira())
+        when(requestor).jira().thenReturn(reporter).thenReturn(reporter)
+        item.withRequestor(requestor)
+        self.assertEqual(requestor, item.requestor())
         self.assertEqual(reporter, item.underlying().reporter())
         self.assertEqual(item.piecesToUpdate(), [{'id':"reporter" , 'values':[reporter,]}])
         
@@ -219,26 +221,42 @@ class JiraTrackerItem_Test(unittest.TestCase):
         item = JiraTrackerItem(testTicket)
         item.withRequestor(JiraUser(testTicket.reporter)) 
         self.assertEqual(item.piecesToUpdate(), [])
+
+    def create_loader(self, ofAttribute):
+        def load_(item, withUser):
+            PivotalToJiraUserMap().reset()
+            PivotalToJiraUserMap().addMapping(withUser, "anything")
+            ofAttribute(item, JiraUser(withUser))
+        return load_
         
     def test_doNotOverwriteUnknownReporter(self):
-        PivotalToJiraUserMap().reset()
         item = JiraTrackerItem()
-        reporter = "reporter"
-        item.withRequestor(JiraUser(reporter))
+        withReporter = "reporter"
+        load = self.create_loader(JiraTrackerItem.withRequestor)
+        load(item, withReporter)
+        PivotalToJiraUserMap().reset()
         random = "me"
         item.withRequestor(JiraUser(random))
         self.assertNotEqual(random, item.requestor().jira())
-        self.assertEqual(reporter, item.requestor().jira())
+        self.assertEqual(withReporter, item.requestor().jira())
 
     def test_canOverwriteKnownReporter(self):
         item = JiraTrackerItem()
-        reporter = "reporter"
-        PivotalToJiraUserMap().reset()
-        PivotalToJiraUserMap().addMapping(reporter, "anything")
-        item.withRequestor(JiraUser(reporter))
-        random = "me"
-        item.withRequestor(JiraUser(random))
-        self.assertEqual(random, item.requestor().jira())
+        withReporter = "reporter"
+        load = self.create_loader(JiraTrackerItem.withRequestor)
+        load(item, withReporter)
+        random = mock()
+        when(random).jira().thenReturn("blah")
+        item.withRequestor(random)
+        self.assertEqual(random, item.requestor())
+        
+    def test_doNotOverwriteWithUnknownReporter(self):
+        item = JiraTrackerItem()
+        withReporter = "reporter"
+        load = self.create_loader(JiraTrackerItem.withRequestor)
+        load(item, withReporter)
+        item.withRequestor(JiraUser(None))
+        self.assertEqual(withReporter, item.requestor().jira())
         
     def test_canChangeAssignee(self):
         item = JiraTrackerItem()        
@@ -257,22 +275,31 @@ class JiraTrackerItem_Test(unittest.TestCase):
     def test_doNotOverwriteUnknownAssignee(self):
         PivotalToJiraUserMap().reset()
         item = JiraTrackerItem()
-        assignee = "assignee"
-        item.withOwner(JiraUser(assignee))
+        withAssignee = "assignee"
+        load = self.create_loader(JiraTrackerItem.withOwner)
+        load(item, withAssignee)
+        PivotalToJiraUserMap().reset()
         random = "me"
         item.withOwner(JiraUser(random))
         self.assertNotEqual(random, item.owner().jira())
-        self.assertEqual(assignee, item.owner().jira())
+        self.assertEqual(withAssignee, item.owner().jira())
 
     def test_canOverwriteKnownAssignee(self):
         item = JiraTrackerItem()
-        assignee = "assignee"
-        PivotalToJiraUserMap().reset()
-        PivotalToJiraUserMap().addMapping(assignee, "anything")
-        item.withOwner(JiraUser(assignee))
+        withAssignee = "assignee"
+        load = self.create_loader(JiraTrackerItem.withOwner)
+        load(item, withAssignee)
         random = "me"
         item.withOwner(JiraUser(random))
         self.assertEqual(random, item.owner().jira())
+        
+    def test_doNotOverwriteWithUnknownOwner(self):
+        item = JiraTrackerItem()
+        withAssignee = "assignee"
+        load = self.create_loader(JiraTrackerItem.withOwner)
+        load(item, withAssignee)
+        item.withOwner(JiraUser(None))
+        self.assertEqual(withAssignee, item.owner().jira())
         
 
 if __name__ == "__main__":

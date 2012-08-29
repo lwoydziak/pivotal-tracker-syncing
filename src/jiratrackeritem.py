@@ -103,6 +103,9 @@ class JiraTrackerItem(TrackerItem):
             return
         if self.requestor() is not None and self.requestor().unknown():
             return
+        if self.requestor() is not None and requestor.jira() is None:
+            return
+        
         super(JiraTrackerItem, self).withRequestor(requestor)
         self.ticket_.setReporter(requestor.jira())
         self.piecesToUpdate_.append({'id':"reporter", 'values':[requestor.jira(),]})
@@ -113,6 +116,9 @@ class JiraTrackerItem(TrackerItem):
             return
         if self.owner() is not None and self.owner().unknown():
             return
+        if self.owner() is not None and owner.jira() is None:
+            return
+        
         super(JiraTrackerItem, self).withOwner(owner)
         self.ticket_.setAssignee(owner.jira())
         self.piecesToUpdate_.append({'id':"assignee", 'values':[owner.jira(),]})
