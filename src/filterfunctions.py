@@ -3,6 +3,7 @@ Created on Aug 29, 2012
 
 @author: lwoydziak
 '''
+from datetime import date
 
 def matchingAJiraTicket(jiraTicket):
     print (jiraTicket.jiraKey())
@@ -26,6 +27,7 @@ def andOmitPivotalTrackerCreatedComments(item):
         if "A Pivotal Tracker story" in comment:
             comments.remove(comment)
 
-def dateFilterGenerator():
-    afterDateFor = {'jira':" and updatedDate > \"2012/10/08 00:00\"", 'pivotal':"modified_since:10/08/2012 includedone:true"}
+def dateFilterGenerator(date = date.today()):
+    afterDateFor = {'jira':" and updatedDate > \""+ date.strftime('%Y/%m/%d') + " 00:00\"",
+                    'pivotal':"modified_since:"+ date.strftime('%m/%d/%Y') + " includedone:true"}
     return afterDateFor        

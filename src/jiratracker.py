@@ -69,14 +69,18 @@ class JiraTracker(Tracker):
     
     def update(self, item):
         super(JiraTracker, self).update(item)
+        print("Update Jira Ticket:")
         if (item.Id() is None):
+            print(item.asRemoteItem())
             issue = self.trackerInstance_.createIssue(self.authentication_, item.asRemoteItem())
         else:
+            print(item.piecesToUpdate())
             issue = self.trackerInstance_.updateIssue(self.authentication_, item.Id(), item.piecesToUpdate())
         updatedItem = JiraTrackerItem(issue)
         if "status" in str(item.piecesToUpdate()):
             updatedItem.withStatus(item.status())
             updatedItem = JiraTrackerItem(self._ticketWithUpdatedStatusFrom(updatedItem))
+        print(item.comments('new'))
         updatedItem.withComments(item.comments('new'))
         # to be fully complete updatedItem also needs exisiting comments - tbd
         return self.updateCommentsFor(updatedItem)
@@ -87,8 +91,9 @@ class JiraTracker(Tracker):
         
     def addCommentsTo(self, item):
         comments = self.trackerInstance_.getComments(self.authentication_, item.Id())
-        for comment in comments:
-            item.addComment(comment['body'], 'existing')
+        if comments is not None:
+            for comment in comments:
+                item.addComment(comment['body'], 'existing')
         return item
 
     def updateCommentsFor(self, item):

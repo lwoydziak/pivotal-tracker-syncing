@@ -4,10 +4,10 @@ import sys
 from syncfunctions import syncPivotalAndJira
 from mappivotaltojirastatus import PivotalToJiraStatusMap
 from mapusers import PivotalToJiraUserMap
-from config import Env
 from pivotaltracker import PivotalTrackerFor
 from jiratracker import JiraTracker
 from timezonejira import JiraTimezone
+from config import Env
 
 __version__ = '0.1.0'
 __all__ = ['', 'main']
@@ -17,9 +17,12 @@ def mapWorkflow():
     for jira in jiraToPivotalStatuses.keys():
         if jira is not "transitions":
             PivotalToJiraStatusMap().addMapping(jira, jiraToPivotalStatuses[jira])
-    transitions = jiraToPivotalStatuses["transitions"]
-    for transition in transitions.keys():
-        PivotalToJiraStatusMap().addMapping(transition, transitionFrom=transitions[transition])
+    try: 
+        transitions = jiraToPivotalStatuses["transitions"]
+        for transition in transitions.keys():
+            PivotalToJiraStatusMap().addMapping(transition, transitionFrom=transitions[transition])
+    except KeyError:
+        return
     
 def mapUsers():
     jiraToPivotalUsers = Env().get("jiraToPivotalUsers") 
@@ -48,7 +51,7 @@ def main(argv=None):
     jira, pivotal = getTrackers()
     jiraProjects, jiraBaseProject, jiraIssueLink = jiraDetails()
     
-    syncPivotalAndJira(jira, pivotal, jiraProjects, jiraBaseProject, jiraIssueLink)
+    syncPivotalAndJira(jira, pivotal, jiraProjects, jiraBaseProject, jiraIssueLink, Env().get("skipSyncs"))
             
 #    print ("Reverse sync Pivotal Items:")
 #    

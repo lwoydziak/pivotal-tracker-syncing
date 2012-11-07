@@ -7,6 +7,7 @@ import unittest
 from filterfunctions import matchingAJiraTicket, JiraIssue, andDontFilterComments, PivotalIssue, andOmitPivotalTrackerCreatedComments, dateFilterGenerator
 from mockito.mocking import mock
 from mockito.mockito import when
+from datetime import datetime
 
 class FilterFunctionsTest(unittest.TestCase):
     def test_filterMatchingAJiraTicketReturnsFilterAsSpecified(self):
@@ -38,8 +39,9 @@ class FilterFunctionsTest(unittest.TestCase):
         self.assertListEqual(comments, [])
         
     def test_filterDateFilterGeneratorReturnsFilterSpecified(self):
-        self.assertDictEqual(dateFilterGenerator(), 
-                             {'jira':" and updatedDate > \"2012/10/08 00:00\"", 'pivotal':"modified_since:10/08/2012 includedone:true"})
+        date = datetime(2011, 2, 6)
+        self.assertDictEqual(dateFilterGenerator(date), 
+                             {'jira':" and updatedDate > \"2011/02/06 00:00\"", 'pivotal':"modified_since:02/06/2011 includedone:true"})
         
 
 if __name__ == "__main__":

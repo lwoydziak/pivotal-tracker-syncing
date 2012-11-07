@@ -209,6 +209,16 @@ class JiraTracker_Test(unittest.TestCase):
         verify(jiraInstance.service, times=2).addComment(any(), any(), any())
         pass
     
+    def test_handleWhenNoCommentsAreReturned(self):
+        jira = JiraTracker()
+        jiraInstance = self.getMockFor(jira)
+        ticket = mock()
+        key = "12345"
+        when(ticket).Id().thenReturn(key)
+        when(jiraInstance.service).getComments(any(),any()).thenReturn(None)
+        jira.addCommentsTo(ticket)
+        verify(jiraInstance.service,times=0).addComment(any(), any(), any())
+    
     def test_jiraItemsAreReturnedWithUrlPopulated(self):
         jira = JiraTracker()
         jiraInstance = self.getMockFor(jira)

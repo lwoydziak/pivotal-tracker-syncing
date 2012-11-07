@@ -8,7 +8,6 @@ import configparser
 import sys
 import csv
 import json
-sys.path.insert(0, "src")
 from singletonbase import Singleton
     
 ## Singleton
@@ -38,7 +37,8 @@ class Env(object, metaclass=Singleton):
             },\
             "jiraToPivotalStatuses" : { \
                 "None" : "None" \
-            }\
+            },\
+            "skipSyncs" : "addFromJira, fromPivotal, fromJira"\
         }'
         self.json = json.loads(initialJson)
         self.load()
@@ -56,11 +56,13 @@ class Env(object, metaclass=Singleton):
         self.json = json.load(configFile)
         
     def get(self, firstLevel, secondLevel=None):
-        if secondLevel is None:
-            return self.json[firstLevel]
-        else:
-            return self.json[firstLevel][secondLevel]
-        
+        try:
+            if secondLevel is None:
+                return self.json[firstLevel]
+            else:
+                return self.json[firstLevel][secondLevel]
+        except KeyError:
+            return ""
 
 
 

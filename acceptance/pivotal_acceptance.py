@@ -5,10 +5,10 @@ Created on Mar 29, 2012
 '''
 import unittest
 import sys
-from config import Env
 from acceptance_test_support import Testing, SinglePivotal
 import time
 sys.path.insert(0, "src")
+from config import Env
 from pivotaltrackeritem import PivotalTrackerItem
 from pivotaltracker import PivotalTrackerFor
 from pytracker import Story

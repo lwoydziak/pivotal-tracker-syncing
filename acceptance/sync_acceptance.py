@@ -6,10 +6,10 @@ Created on Apr 18, 2012
 
 import unittest
 import sys
-from config import Env
 from acceptance_test_support import SingleJira, SinglePivotal
 from jiratrackeritem import JiraTrackerItem
 sys.path.insert(0, "src")
+from config import Env
 from jiratracker import JiraTracker
 from pivotaltracker import PivotalTrackerFor
 from jiraitemfactory import jiraItemFactory
@@ -85,7 +85,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         jira = self.jira_
         pivotal = self.pivotal_
         summary = "test_newIssueInJiraIsCopiedToPivotal"
-        newJiraItem = jiraItemFactory(Env().jiraProject, summary, "a test description")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), summary, "a test description")
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         pivotalItem = next(pivotal.items())
         self.assertEqual(pivotalItem.summary(), summary)
@@ -96,7 +96,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         pivotal = self.pivotal_
         desiredSummary = "test_existingIssueInJiraIsSyncedWithExistingIssueInPivotal"
         desiredDescription = "overwritten!"
-        newJiraItem = jiraItemFactory(Env().jiraProject, "to be overwritten", "also overwritten" )
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "to be overwritten", "also overwritten" )
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         jiraItem = next(jira.items())
         jiraItem.withDescription(desiredDescription)
@@ -111,7 +111,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_commentOnIssueInJiraIsSyncedToPivotal(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "to test comments", "blah")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "to test comments", "blah")
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         commentOnJira = "this commentOnJira can be synced"
         jiraItem = next(jira.items())
@@ -125,7 +125,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_commentOnIssueInPivotalIsSyncedToJira(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_commentOnIssueInPivotalIsSyncedToJira", "blah")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_commentOnIssueInPivotalIsSyncedToJira", "blah")
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         commentOnPivotal = "this commentOnPivotal can be synced"
         pivotalItem = next(pivotal.items())
@@ -139,7 +139,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_issueInJiraAndInPivotalAreSyncable(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_issueInJiraAndInPivotalAreSyncable", "a test description")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_issueInJiraAndInPivotalAreSyncable", "a test description")
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         jiraItem = next(jira.items())
         pivotalItem = next(pivotal.items())
@@ -148,7 +148,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_20000PlusCharacterCommentsAreNotSyned(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_20000PlusCharacterCommentsAreNotSyned", "blah")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_20000PlusCharacterCommentsAreNotSyned", "blah")
         commentOnJira = Testing.stringOfAsOfSize(20002)
         newJiraItem.addComment(commentOnJira)
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
@@ -158,7 +158,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_canSyncStatusToPivotalForExistingItems(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_canSyncStatusToPivotalForExistingItems", "a test description")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_canSyncStatusToPivotalForExistingItems", "a test description")
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         jiraItem = next(jira.items())
         status = TrackerItemStatus("accepted")
@@ -171,7 +171,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_canSyncReporterToPivotalForExistingItems(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_canSyncReporterToPivotalForExistingItems", "a test description")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_canSyncReporterToPivotalForExistingItems", "a test description")
         getOtherUserAfterUpdatingJiraItem = self.create_getOtherUserAfterUpdatingJiraItem(JiraTrackerItem.withRequestor)
         user = getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
         self.syncExistingItemFrom(jira, toTracker=pivotal)
@@ -181,7 +181,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_doNotOverwriteJiraReporterWhenUnknown(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraReporterWhenUnknown", "a test description")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_doNotOverwriteJiraReporterWhenUnknown", "a test description")
         getOtherUserAfterUpdatingJiraItem = self.create_getOtherUserAfterUpdatingJiraItem(JiraTrackerItem.withRequestor)
         user = getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
         jiraItem = self.tryToSyncUnknownUser(jira, pivotal)
@@ -190,7 +190,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_canSyncOwnerToPivotalForExistingItems(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_canSyncOwnerToPivotalForExistingItems", "a test description")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_canSyncOwnerToPivotalForExistingItems", "a test description")
         getOtherUserAfterUpdatingJiraItem = self.create_getOtherUserAfterUpdatingJiraItem(JiraTrackerItem.withOwner)
         user = getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
         self.syncExistingItemFrom(jira, toTracker=pivotal)
@@ -200,7 +200,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_doNotOverwriteJiraOwnerWhenUnknown(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraOwnerWhenUnknown", "a test description")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_doNotOverwriteJiraOwnerWhenUnknown", "a test description")
         getOtherUserAfterUpdatingJiraItem = self.create_getOtherUserAfterUpdatingJiraItem(JiraTrackerItem.withOwner)
         user = getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
         jiraItem = self.tryToSyncUnknownUser(jira, pivotal)
@@ -210,7 +210,7 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_doNotOverwriteJiraReporterWhenUnassignedInPivotal(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraReporterWhenUnassignedInPivotal", "a test description")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_doNotOverwriteJiraReporterWhenUnassignedInPivotal", "a test description")
         newJiraItem.withRequestor(PivotalUser(Env().pivotalTrackerOtherUser))
         getOtherUserAfterUpdatingJiraItem = self.create_getOtherUserAfterUpdatingJiraItem(JiraTrackerItem.withRequestor)
         user = getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
@@ -221,13 +221,45 @@ class SyncAcceptanceTest(unittest.TestCase):
     def test_doNotOverwriteJiraOwnerWhenUnassignedInPivotal(self):
         jira = self.jira_
         pivotal = self.pivotal_
-        newJiraItem = jiraItemFactory(Env().jiraProject, "test_doNotOverwriteJiraOwnerWhenUnassignedInPivotal", "a test description")
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_doNotOverwriteJiraOwnerWhenUnassignedInPivotal", "a test description")
         newJiraItem.withOwner(PivotalUser(Env().pivotalTrackerOtherUser))
         getOtherUserAfterUpdatingJiraItem = self.create_getOtherUserAfterUpdatingJiraItem(JiraTrackerItem.withRequestor)
         user = getOtherUserAfterUpdatingJiraItem(jira, pivotal, newJiraItem)
         updatePivotalAndSyncJiraItem = self.create_updatePivotalAndSyncJiraItem(PivotalTrackerItem.withOwner)
         jiraItem = updatePivotalAndSyncJiraItem(jira, pivotal)
-        self.assertEqual(jiraItem.owner(), user)    
+        self.assertEqual(jiraItem.owner(), user)
+        
+    def test_whenTicketNumberInCommentsOfOtherTickerTheRightSyncOccurs(self):
+        jira = self.jira_
+        pivotal = self.pivotal_
+        desiredSummary = "test_whenTicketNumberInCommentsOfOtherTickerTheRightSyncOccurs-1"
+        desiredDescription = "overwritten!"
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "to be overwritten", "also overwritten" )
+        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
+        jiraItem = next(jira.items())
+        
+        newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_whenTicketNumberInCommentsOfOtherTickerTheRightSyncOccurs-2", "don't overwrite" )
+        newJiraItem.addComment(jiraItem.Id())
+        self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
+        
+        for item in jira.items():
+            jiraItem = item
+        
+        jiraItem.withDescription(desiredDescription)
+        jiraItem.withSummary(desiredSummary)
+        jira.update(jiraItem)
+        
+        syncItem = TrackerSyncBy.syncingItem()
+        for item in jira.items():
+            syncItem(item, toTracker=pivotal)
+        
+        
+        for item in pivotal.items():
+            updatedPivotalItem = item
+        
+        self.assertEqual(updatedPivotalItem.summary(), desiredSummary)
+        self.assertEqual(updatedPivotalItem.description(), desiredDescription)
+        pass 
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

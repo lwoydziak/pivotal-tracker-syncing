@@ -6,6 +6,7 @@ Created on Sep 6, 2012
 from trackersyncby import TrackerSyncBy
 from pivotaltrackeritem import PivotalTrackerItem
 from filterfunctions import matchingAJiraTicket, JiraIssue, andDontFilterComments, PivotalIssue, andOmitPivotalTrackerCreatedComments, dateFilterGenerator
+from datetime import datetime
 
 filterInOnlyNewIssues = " and status != closed and status != \"In Test\""
 
@@ -30,12 +31,15 @@ def syncUpdatedItemsInJira(toTracker, jira, jiraJql, afterDate, obtainedFromFilt
         for ticket in jira.items(inJiraQuery + afterDate):
             syncChangesFor(ticket, toTracker)
             
-def syncPivotalAndJira(jira, pivotal, jiraProjects, jiraBaseProject, jiraIssueLink):
-    filterOutOldTicketsFor = dateFilterGenerator()
+def syncPivotalAndJira(jira, pivotal, jiraProjects, jiraBaseProject, jiraIssueLink, skipSyncs):
+    filterOutOldTicketsFor = dateFilterGenerator() # datetime(2012, 10, 29)
     jiraProjects = list(jiraProjects)
-    print("Try To Add From Jira:")
-    addItemsFrom(jira, pivotal, jiraProjects, jiraBaseProject, filterInOnlyNewIssues + filterOutOldTicketsFor['jira'], PivotalTrackerItem, matchingAJiraTicket)
-    print("Sync Items From Pivotal:")
-    syncUpdatedItemsInPivotal(jira, pivotal, filterOutOldTicketsFor['pivotal'], JiraIssue, andDontFilterComments, jiraIssueLink)
-    print("Sync Items From Jira:")
-    syncUpdatedItemsInJira(pivotal, jira, jiraProjects, filterOutOldTicketsFor['jira'], PivotalIssue, andOmitPivotalTrackerCreatedComments)
+    if not "addFromJira" in skipSyncs:
+        print("Try To Add From Jira:")
+        addItemsFrom(jira, pivotal, jiraProjects, jiraBaseProject, filterInOnlyNewIssues + filterOutOldTicketsFor['jira'], PivotalTrackerItem, matchingAJiraTicket)
+    if not "fromPivotal" in skipSyncs:
+        print("Sync Items From Pivotal:")
+        syncUpdatedItemsInPivotal(jira, pivotal, filterOutOldTicketsFor['pivotal'], JiraIssue, andDontFilterComments, jiraIssueLink)
+    if not "fromJira" in skipSyncs:
+        print("Sync Items From Jira:")
+        syncUpdatedItemsInJira(pivotal, jira, jiraProjects, filterOutOldTicketsFor['jira'], PivotalIssue, andOmitPivotalTrackerCreatedComments)

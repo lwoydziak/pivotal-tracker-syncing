@@ -14,28 +14,27 @@ class Sync(object):
         self.to_ = None
         self.from_ = None
         self.toTracker_ = None
-        self.fromTracker_ = None   
+        self.fromTracker_ = None  
 
     def needsSync(self):
+        if self.from_ is None or self.from_.canBeSyncedWith(self.to_) is False:
+            return False
         toBeSyncedItemUpdated = self.from_.updatedAt()
         toSyncWithItemUpdated = self.to_.updatedAt()
         return toBeSyncedItemUpdated <= toSyncWithItemUpdated
-#        return True
     
-    def canSync(self):
-        return self.from_.canBeSyncedWith(self.to_)
-
 class ForwardSync(Sync):
-    def __init__(self, filter, given, gotFromTracker, getFromTracker):
+    def __init__(self, filter, given, toTracker, unused):
         super(ForwardSync, self).__init__()
         self.filter_ = filter
         self.to_ = given
         self.from_ = None
-        self.toTracker_ = gotFromTracker
-        self.fromTracker_ = getFromTracker
+        self.toTracker_ = toTracker
     
     def obtainItem(self):
-        self.from_ = next(self.toTracker_.items(self.filter_(self.to_)))
+        for item in self.toTracker_.items(self.filter_(self.to_)):
+            if item.canBeSyncedWith(self.to_):
+                self.from_ = item
 
     def sync(self, FilteringOutCommentsFor): 
         self.from_.syncWith(self.to_)
@@ -44,16 +43,18 @@ class ForwardSync(Sync):
 
 
 class ReverseSync(Sync):
-    def __init__(self, filter, given, gotFromTracker, getFromTracker):
+    def __init__(self, filter, given, trackerToGetItemToSync, trackerToSyncTo):
         super(ReverseSync, self).__init__()
         self.filter_ = filter
         self.to_ = given
         self.from_ = None
-        self.toTracker_ = getFromTracker
-        self.fromTracker_ = gotFromTracker
+        self.toTracker_ = trackerToSyncTo
+        self.fromTracker_ = trackerToGetItemToSync
     
     def obtainItem(self):
-        self.from_ =  next(self.fromTracker_.items(self.filter_(self.to_)))
+        for item in self.fromTracker_.items(self.filter_(self.to_)):
+            if item.canBeSyncedWith(self.to_):
+                self.from_ = item
 
     def sync(self, FilteringOutCommentsFor): 
         self.to_.syncWith(self.from_)
@@ -93,6 +94,6 @@ class TrackerSyncBy(object):
             except StopIteration:
                 return
             else:
-                if syncer.canSync() and syncer.needsSync():
+                if syncer.needsSync():
                     syncer.sync(FilteringOutCommentsFor)
         return syncingDetails_

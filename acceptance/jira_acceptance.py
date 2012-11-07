@@ -5,10 +5,10 @@ Created on Mar 29, 2012
 '''
 import unittest
 import sys
-from config import Env
 from acceptance_test_support import Testing, SingleJira
 from jiraitemfactory import jiraItemFactory
 sys.path.insert(0, "src")
+from config import Env
 from mappivotaltojirastatus import PivotalToJiraStatusMap
 from mapusers import PivotalToJiraUserMap
 from trackeritemstatus import TrackerItemStatus

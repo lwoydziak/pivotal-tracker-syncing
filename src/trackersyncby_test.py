@@ -140,7 +140,7 @@ class TrackerSyncByTest(unittest.TestCase):
         otherItem = mock()
         syncCommentsFor = TrackerSyncBy.syncingItem()
         when(toTracker).items(None).thenReturn(Testing.MockIterator([item]))
-        when(otherItem).canBeSyncedWith(item).thenReturn(False)
+        when(item).canBeSyncedWith(otherItem).thenReturn(False)
         syncCommentsFor(otherItem, toTracker)
         verify(item, never).syncWith(any())
         verify(toTracker, never).update(item)
@@ -181,6 +181,26 @@ class TrackerSyncByTest(unittest.TestCase):
         verify(itemToSyncFrom).syncWith(itemToSyncTo)
         verify(fromTracker).update(itemToSyncFrom)
         
+    def test_rightItemReturnedWhenMoreThanOneItemReturnedForForwardSync(self):
+        toTracker = mock()
+        items = [mock(), mock(), mock()]
+        when(toTracker).items(any()).thenReturn(Testing.MockIterator([items[1],items[2]]))
+        when(items[1]).canBeSyncedWith(items[0]).thenReturn(False)
+        when(items[2]).canBeSyncedWith(items[0]).thenReturn(True)
+        forwardSync = ForwardSync(mock().function, items[0], toTracker, None)
+        forwardSync.obtainItem()
+        verify(items[2]).canBeSyncedWith(items[0])
+        
+    def test_rightItemReturnedWhenMoreThanOneItemReturnedForReverseSync(self):
+        toTracker = mock()
+        items = [mock(), mock(), mock()]
+        when(toTracker).items(any()).thenReturn(Testing.MockIterator([items[1],items[2]]))
+        when(items[1]).canBeSyncedWith(items[0]).thenReturn(False)
+        when(items[2]).canBeSyncedWith(items[0]).thenReturn(True)
+        forwardSync = ReverseSync(mock().function, items[0], toTracker, None)
+        forwardSync.obtainItem()
+        verify(items[2]).canBeSyncedWith(items[0])
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

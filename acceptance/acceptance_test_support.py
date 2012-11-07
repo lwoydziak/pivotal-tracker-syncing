@@ -3,9 +3,9 @@ Created on May 3, 2012
 
 @author: lwoydziak
 '''
-from config import Env
 import sys
 sys.path.insert(0, "src")
+from config import Env
 from singletonbase import Singleton
 from jiratracker import JiraTracker
 from pivotaltracker import PivotalTrackerFor
@@ -46,24 +46,30 @@ class Testing(object):
     
     @staticmethod
     def mapStatuses(tracker):
-        statuses = tracker.getAvailableStatuses()
-        PivotalToJiraStatusMap().addMapping(jira="Closed", pivotal="accepted")
-        PivotalToJiraStatusMap().addMapping(jira="New", pivotal="unscheduled")
-        PivotalToJiraStatusMap().addMapping(jira="In Work", pivotal="started")
-        PivotalToJiraStatusMap().addMapping(jira="In Work", transitionFrom="Assigned")
-        PivotalToJiraStatusMap().insert(statuses)
+        jiraToPivotalStatuses = Env().get("jiraToPivotalStatuses") 
+        for jira in jiraToPivotalStatuses.keys():
+            if jira is not "transitions":
+                PivotalToJiraStatusMap().addMapping(jira, jiraToPivotalStatuses[jira])
+        try: 
+            transitions = jiraToPivotalStatuses["transitions"]
+            for transition in transitions.keys():
+                PivotalToJiraStatusMap().addMapping(transition, transitionFrom=transitions[transition])
+        except KeyError:
+            pass 
+        PivotalToJiraStatusMap().insert(tracker.getAvailableStatuses())
         
     @staticmethod
     def mapUsers():
-        PivotalToJiraUserMap().addMapping(jira=Env().jiraUsername, pivotal=Env().pivotalTrackerUsername)
-        PivotalToJiraUserMap().addMapping(jira=Env().jiraOtherUser, pivotal=Env().pivotalTrackerOtherUser)
+        jiraToPivotalUsers = Env().get("jiraToPivotalUsers") 
+        for jira in jiraToPivotalUsers.keys():
+            PivotalToJiraUserMap().addMapping(jira, jiraToPivotalUsers[jira])
     
 class SingleJira(object, metaclass=Singleton):
     def __init__(self):
-        tracker = JiraTracker(Env().jiraUrl)
-        tracker.setTimezone(JiraTimezone(Env().jiraTimeToUtcHours))
-        tracker.loginAs(Env().jiraUsername).withCredential(Env().jiraPassword)
-        tracker.selectProject([Env().jiraProject, next(Env().jiraJql())])
+        tracker = JiraTracker(Env().get("jira", "url"))
+        tracker.setTimezone(JiraTimezone(Env().get("jira", "timeToUtcHours")))
+        tracker.loginAs(Env().get("jira","username")).withCredential(Env().get("jira","password"))
+        tracker.selectProject([Env().get("jira","project"), Env().get("jira","jql")[0]])
         self.tracker_ = tracker
         
     def instance(self):
@@ -71,8 +77,8 @@ class SingleJira(object, metaclass=Singleton):
     
 class SinglePivotal(object, metaclass=Singleton):
     def __init__(self):
-        tracker = PivotalTrackerFor(Env().pivotalTrackerProject)
-        tracker.loginAs(Env().pivotalTrackerLogin).withCredential(Env().pivotalTrackerPassword)
+        tracker = PivotalTrackerFor(Env().get("pivotal", "project"))
+        tracker.loginAs(Env().get("pivotal", "login")).withCredential(Env().get("pivotal", "password"))
         self.tracker_ = tracker
         
     def instance(self):

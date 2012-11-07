@@ -49,7 +49,7 @@ do
 	if ! yolk -l $P | grep -i $P >/dev/null 2>&1	
 	then
 		echo "Python package $P not found, installing..."
-		if ["$P" == "suds"]; then
+		if [[ $P == 'suds' ]]; then
 			easy_install http://bitbucket.org/bernh/suds-python-3-patches/downloads/suds_patched.zip
 		else
 			easy_install $P
