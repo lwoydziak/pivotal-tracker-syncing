@@ -33,13 +33,13 @@ class JiraAccpetanceTest(unittest.TestCase):
         
     def test_canDeleteJiraIssue(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canDeleteJiraIssue", "A test description")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canDeleteJiraIssue", "A test description")
         tracker.update(item)
         tracker.delete(next(tracker.items()))
         
     def test_canDownloadStoriesFromJira(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canDownloadStoriesFromJira-1", "A test description")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canDownloadStoriesFromJira-1", "A test description")
         tracker.update(item)
         item.withSummary("test_canDownloadStoriesFromJira-2")
         tracker.update(item)
@@ -52,7 +52,7 @@ class JiraAccpetanceTest(unittest.TestCase):
         tracker = self.jira_
         name = "test_canAddStoryStoryToPivotal"
         description = "this is a test"
-        item = jiraItemFactory(Env().jiraProject, name, description)
+        item = jiraItemFactory(Env().get("jira", "project"), name, description)
         tracker.update(item)
         story = next(tracker.items())
         self.assertEqual(story.summary(), name)
@@ -60,7 +60,7 @@ class JiraAccpetanceTest(unittest.TestCase):
         
     def test_canRemoveAllStoriesFromJira(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canRemoveAllStoriesFromJira-1", "can delete this?")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canRemoveAllStoriesFromJira-1", "can delete this?")
         tracker.update(item)
         item.withSummary("test_canRemoveAllStoriesFromJira-2")
         tracker.update(item)
@@ -69,13 +69,13 @@ class JiraAccpetanceTest(unittest.TestCase):
         
     def test_canUpdateItemAlreadyInJira(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canUpdateItemAlreadyInJira-1", "can update this?")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canUpdateItemAlreadyInJira-1", "can update this?")
         tracker.update(item)
         Testing.canUpdateItemsIn(tracker, self)        
     
     def test_canAddCommentsToTicket(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canAddCommentsToTicket-1", "can comment on this?")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canAddCommentsToTicket-1", "can comment on this?")
         tracker.update(item)
         aComment = Testing.addCommentToItemIn(tracker)
         item = next(tracker.items())
@@ -89,25 +89,25 @@ class JiraAccpetanceTest(unittest.TestCase):
     def test_canAdjustStateOfTicket(self):
         tracker = self.jira_
         Testing.mapStatuses(tracker)
-        item = jiraItemFactory(Env().jiraProject, "test_canAdjustStateOfTicket-1", "can change the status of this ticket?")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canAdjustStateOfTicket-1", "can change the status of this ticket?")
         Testing.putItemToTrackerAndChangeStatusTo("accepted", item, tracker)
         item = next(tracker.items())
         self.assertEqual(item.status(), TrackerItemStatus("accepted"))
 
     def test_canFilterTicketsReturnedFromJiraSoNoMatchesAreFound(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canFilterTicketsReturnedFromJiraSoNoMatchesAreFound", "description")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canFilterTicketsReturnedFromJiraSoNoMatchesAreFound", "description")
         tracker.update(item)
         forFilter = "labels = WLK"
         self.assertRaises(StopIteration, next, tracker.items(forFilter))
         
     def test_canFilterTicketsReturnedFromJiraOnlyOneMatchIsFound(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canFilterTicketsReturnedFromJiraOnlyOneMatchIsFound", "description")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canFilterTicketsReturnedFromJiraOnlyOneMatchIsFound", "description")
         tracker.update(item)
         searchableSummary = "searchForMe"
         forFilter = "summary ~ " + searchableSummary
-        item = jiraItemFactory(Env().jiraProject, searchableSummary, "description")
+        item = jiraItemFactory(Env().get("jira", "project"), searchableSummary, "description")
         tracker.update(item)
         item = tracker.items(forFilter)
         self.assertEqual(next(item).summary(), searchableSummary)
@@ -115,7 +115,7 @@ class JiraAccpetanceTest(unittest.TestCase):
         
     def test_ticketUpdatedWhenNotChangedDoesNotModifyTicket(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_ticketUpdatedWhenNotChangedDoesNotModifyTicket", "description")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_ticketUpdatedWhenNotChangedDoesNotModifyTicket", "description")
         tracker.update(item)
         itemInJira = next(tracker.items())
         itemInJira.syncWith(itemInJira)
@@ -126,49 +126,49 @@ class JiraAccpetanceTest(unittest.TestCase):
     def test_canMoveNewStateToInWork(self):
         tracker = self.jira_
         Testing.mapStatuses(tracker)
-        item = jiraItemFactory(Env().jiraProject, "test_canMoveNewStateToInWork-1", "can change the status to In Work?")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canMoveNewStateToInWork-1", "can change the status to In Work?")
         Testing.putItemToTrackerAndChangeStatusTo("started", item, tracker)
         item = next(tracker.items())
         self.assertEqual(item.status(), TrackerItemStatus("started"))
 
     def test_canGetReporter(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canGetReporter-1", "can get reporter")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canGetReporter-1", "can get reporter")
         tracker.update(item)
         item = next(tracker.items())
-        self.assertEqual(Env().jiraUsername, item.requestor().jira())
+        self.assertEqual(Env().get("jira", "username"), item.requestor().jira())
         
     def test_canSetReporter(self):
         Testing.mapUsers()
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canSetReporter-1", "can set reporter")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canSetReporter-1", "can set reporter")
         tracker.update(item)
         item = next(tracker.items())
-        user = JiraUser(Env().jiraOtherUser)
+        user = JiraUser(Env().get("jira", "otherUser"))
         item.withRequestor(user)
         tracker.update(item)
         item = next(tracker.items())
-        self.assertEqual(Env().jiraOtherUser, item.requestor().jira())
+        self.assertEqual(Env().get("jira", "otherUser"), item.requestor().jira())
         PivotalToJiraUserMap().reset()
         
     def test_canGetAssignee(self):
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canGetAssignee-1", "can get assignee")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canGetAssignee-1", "can get assignee")
         tracker.update(item)
         item = next(tracker.items())
-        self.assertEqual(Env().jiraUsername, item.owner().jira())
+        self.assertEqual(Env().get("jira", "username"), item.owner().jira())
         
     def test_canSetAssignee(self):
         Testing.mapUsers()
         tracker = self.jira_
-        item = jiraItemFactory(Env().jiraProject, "test_canSetAssignee-1", "can set assignee")
+        item = jiraItemFactory(Env().get("jira", "project"), "test_canSetAssignee-1", "can set assignee")
         tracker.update(item)
         item = next(tracker.items())
-        user = JiraUser(Env().jiraOtherUser)
+        user = JiraUser(Env().get("jira", "otherUser"))
         item.withOwner(user)
         tracker.update(item)
         item = next(tracker.items())
-        self.assertEqual(Env().jiraOtherUser, item.owner().jira())
+        self.assertEqual(Env().get("jira", "otherUser"), item.owner().jira())
         PivotalToJiraUserMap().reset()
        
 if __name__ == "__main__":

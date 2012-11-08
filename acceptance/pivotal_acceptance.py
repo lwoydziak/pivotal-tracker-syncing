@@ -111,9 +111,10 @@ class PivotalAcceptanceTest(unittest.TestCase):
         forFilter = "searchForMe"
         item = PivotalTrackerItem().withSummary(forFilter).withDescription("description")
         tracker.update(item)
+        time.sleep(2)
         item = PivotalTrackerItem().withSummary("test_canFilterStoriesReturnedFromTrackerOnlyOneMatchIsFound").withDescription("description")
         tracker.update(item)
-        time.sleep(3)
+        time.sleep(4)
         itemIterator = tracker.items(forFilter)
         next(itemIterator)
         self.assertRaises(StopIteration, next, itemIterator)
@@ -151,29 +152,29 @@ class PivotalAcceptanceTest(unittest.TestCase):
         item = PivotalTrackerItem().withSummary("test_canGetRequestor-1").withDescription("can get the requestor of this ticket?")  
         tracker.update(item)
         item = next(tracker.items())
-        self.assertTrue("Woydziak" in item.requestor().pivotal())       
+        self.assertTrue(Env().get("pivotal", "username") in item.requestor().pivotal())       
         
     def test_canChangeRequestor(self):
         tracker = self.pivotal_
         item = PivotalTrackerItem().withSummary("test_canChangeRequestor-1").withDescription("can change the requestor of this ticket?")  
         tracker.update(item)
         item = next(tracker.items())
-        newRequestor = PivotalUser(Env().pivotalTrackerOtherUser)
+        newRequestor = PivotalUser(Env().get("pivotal", "otherUser"))
         item.withRequestor(newRequestor)
         tracker.update(item)
         item = next(tracker.items())
-        self.assertTrue("Test User" in item.requestor().pivotal())
+        self.assertTrue(Env().get("pivotal", "otherUser") in item.requestor().pivotal())
         
     def test_canChangeOwner(self):
         tracker = self.pivotal_
         item = PivotalTrackerItem().withSummary("test_canChangeOwner-1").withDescription("can change the owner of this ticket?").withType("bug")  
         Testing.putItemToTrackerAndChangeStatusTo("started", item, tracker)
         item = next(tracker.items())
-        newOwner = PivotalUser(Env().pivotalTrackerOtherUser)
+        newOwner = PivotalUser(Env().get("pivotal", "otherUser"))
         item.withOwner(newOwner)
         tracker.update(item)
         item = next(tracker.items())
-        self.assertTrue("Test User" in item.owner().pivotal())   
+        self.assertTrue(Env().get("pivotal", "otherUser") in item.owner().pivotal())   
         
         
 if __name__ == "__main__":

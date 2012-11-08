@@ -43,3 +43,7 @@ def syncPivotalAndJira(jira, pivotal, jiraProjects, jiraBaseProject, jiraIssueLi
     if not "fromJira" in skipSyncs:
         print("Sync Items From Jira:")
         syncUpdatedItemsInJira(pivotal, jira, jiraProjects, filterOutOldTicketsFor['jira'], PivotalIssue, andOmitPivotalTrackerCreatedComments)
+        # because of the way Jira commits comments to a seperate database, a comments could be synced only
+        # do another sync to make sure the other commits (status, assignee, etc) also come over
+        # see issue: https://code.google.com/p/pivotal-tracker-syncing/issues/detail?id=21
+        syncUpdatedItemsInJira(pivotal, jira, jiraProjects, filterOutOldTicketsFor['jira'], PivotalIssue, andOmitPivotalTrackerCreatedComments)
