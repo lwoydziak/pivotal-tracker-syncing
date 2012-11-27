@@ -16,7 +16,8 @@ from jiraitemfactory import jiraItemFactory
 from pivotaltrackeritem import PivotalTrackerItem
 from trackersyncby import TrackerSyncBy
 from trackeritemstatus import TrackerItemStatus
-from trackeritemuser import JiraUser, PivotalUser 
+from trackeritemuser import JiraUser, PivotalUser
+from trackeritemcomment import TrackerItemComment
 from mappivotaltojirastatus import PivotalToJiraStatusMap
 from mapusers import PivotalToJiraUserMap
 from unit_test_support import Testing
@@ -113,7 +114,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         pivotal = self.pivotal_
         newJiraItem = jiraItemFactory(Env().get("jira", "project"), "to test comments", "blah")
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
-        commentOnJira = "this commentOnJira can be synced"
+        commentOnJira = TrackerItemComment("this commentOnJira can be synced")
         jiraItem = next(jira.items())
         jiraItem.addComment(commentOnJira)
         jira.update(jiraItem)
@@ -127,7 +128,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         pivotal = self.pivotal_
         newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_commentOnIssueInPivotalIsSyncedToJira", "blah")
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
-        commentOnPivotal = "this commentOnPivotal can be synced"
+        commentOnPivotal = TrackerItemComment("this commentOnPivotal can be synced")
         pivotalItem = next(pivotal.items())
         pivotalItem.addComment(commentOnPivotal)
         pivotal.update(pivotalItem)
@@ -149,7 +150,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         jira = self.jira_
         pivotal = self.pivotal_
         newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_20000PlusCharacterCommentsAreNotSyned", "blah")
-        commentOnJira = Testing.stringOfAsOfSize(20002)
+        commentOnJira = TrackerItemComment(Testing.stringOfAsOfSize(20002))
         newJiraItem.addComment(commentOnJira)
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         pivotalItem = next(pivotal.items())
@@ -239,7 +240,7 @@ class SyncAcceptanceTest(unittest.TestCase):
         jiraItem = next(jira.items())
         
         newJiraItem = jiraItemFactory(Env().get("jira", "project"), "test_whenTicketNumberInCommentsOfOtherTickerTheRightSyncOccurs-2", "don't overwrite" )
-        newJiraItem.addComment(jiraItem.Id())
+        newJiraItem.addComment(TrackerItemComment(jiraItem.Id()))
         self.syncNewItemToPivotal(newJiraItem, jira, pivotal)
         
         for item in jira.items():

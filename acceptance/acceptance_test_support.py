@@ -13,6 +13,7 @@ from trackeritemstatus import TrackerItemStatus
 from mappivotaltojirastatus import PivotalToJiraStatusMap
 from mapusers import PivotalToJiraUserMap
 from timezonejira import JiraTimezone
+from trackeritemcomment import TrackerItemComment
 
 class Testing(object):
 
@@ -30,7 +31,7 @@ class Testing(object):
     @staticmethod
     def addCommentToItemIn(tracker):
         item = next(tracker.items())
-        aComment = "I am adding this comment"
+        aComment = TrackerItemComment("I am adding this comment")
         item.addComment(aComment)
         tracker.update(item)
         return aComment
