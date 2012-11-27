@@ -14,6 +14,7 @@ from datetime import datetime
 from pivotaltrackeritem import PivotalTrackerItem
 from mockito import inorder
 from unit_test_support import Testing
+from trackeritemcomment import PivotalComment
 
 
 class PivotalTrackerTest(unittest.TestCase):
@@ -169,19 +170,21 @@ class PivotalTrackerTest(unittest.TestCase):
         comment2 = Comment()
         comment2.text = "Comment 2"
         twoComments = [comment1, comment2]
+        comment1 = PivotalComment(comment1)
+        comment2 = PivotalComment(comment2)
         when(story).Id().thenReturn(storyId)
         when(trackerInstance).GetComments(any()).thenReturn(twoComments)
         tracker.addCommentsTo(story)
         verify(trackerInstance).GetComments(storyId)
         inorder.verify(story).Id()
-        inorder.verify(story).addComment(twoComments[0].GetText(), 'existing')
-        inorder.verify(story).addComment(twoComments[1].GetText(), 'existing')
+        inorder.verify(story).addComment(comment1, 'existing')
+        inorder.verify(story).addComment(comment2, 'existing')
         pass
     
     def itemWithComments(self, testing):
         issue = Story()
         issue.story_id = "1234"
-        return testing.itemWithCommentsOfType(PivotalTrackerItem, issue)
+        return testing.itemWithCommentsOfType(PivotalComment, PivotalTrackerItem, issue)
         
     def test_canAddCommentsToStoryTicket(self):
         tracker = self.makeValidTracker()
@@ -189,8 +192,8 @@ class PivotalTrackerTest(unittest.TestCase):
         testing = Testing()
         item = self.itemWithComments(testing)
         tracker.updateCommentsFor(item)
-        inorder.verify(trackerInstance).AddComment(testing.issue.GetStoryId(), testing.comment1)
-        inorder.verify(trackerInstance).AddComment(testing.issue.GetStoryId(), testing.comment2)
+        inorder.verify(trackerInstance).AddComment(testing.issue.GetStoryId(), testing.comment1.text())
+        inorder.verify(trackerInstance).AddComment(testing.issue.GetStoryId(), testing.comment2.text())
         pass
     
     def test_updateAddsNewComments(self):

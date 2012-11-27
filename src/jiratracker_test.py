@@ -9,13 +9,14 @@ from mockito.mocking import mock
 from mockito.mockito import verify, when
 from mockito.matchers import any
 from suds import WebFault
-from jiraremotestructures import RemoteIssue
+from jiraremotestructures import RemoteIssue, RemoteComment
 from mockito.verification import never
 from datetime import datetime
 from jiratrackeritem import JiraTrackerItem
 from mockito import inorder
 from unit_test_support import Testing
 from collections import namedtuple
+from trackeritemcomment import JiraComment
 
 class Holder(object):
     pass
@@ -174,20 +175,20 @@ class JiraTracker_Test(unittest.TestCase):
         jiraInstance = self.getMockFor(jira)
         ticket = mock()
         key = "12345"
-        twoComments = [{'created':datetime.now(), 'author':"lwoydziak", 'body':"Comment 1"}, {'created':datetime.now(), 'author':"lwoydziak", 'body':"Comment 2"}]
+        twoComments = [RemoteComment("comment0"), RemoteComment("comment1")]        
         when(ticket).Id().thenReturn(key)
         when(jiraInstance.service).getComments(any(),any()).thenReturn(twoComments)
         jira.addCommentsTo(ticket)
         verify(jiraInstance.service).getComments(self.auth_, key)
         inorder.verify(ticket).Id()
-        inorder.verify(ticket).addComment(twoComments[0]['body'], 'existing')
-        inorder.verify(ticket).addComment(twoComments[1]['body'], 'existing')
+        inorder.verify(ticket).addComment(JiraComment(twoComments[0]), 'existing')
+        inorder.verify(ticket).addComment(JiraComment(twoComments[1]), 'existing')
         pass
     
     def itemWithComments(self, testing):
         issue = RemoteIssue()
         issue.key = 1234
-        return testing.itemWithCommentsOfType(JiraTrackerItem, issue)
+        return testing.itemWithCommentsOfType(JiraComment, JiraTrackerItem, issue)
     
     def test_canAddCommentsToTicket(self):
         jira = JiraTracker()
@@ -196,8 +197,8 @@ class JiraTracker_Test(unittest.TestCase):
         item = self.itemWithComments(testing)
         jira.updateCommentsFor(item)
         inorder.verify(jiraInstance.service).login(any(),any())
-        inorder.verify(jiraInstance.service).addComment(self.auth_, testing.issue.key, {"body":testing.comment1})
-        inorder.verify(jiraInstance.service).addComment(self.auth_, testing.issue.key, {"body":testing.comment2})
+        inorder.verify(jiraInstance.service).addComment(self.auth_, testing.issue.key, {"body":testing.comment1.text()})
+        inorder.verify(jiraInstance.service).addComment(self.auth_, testing.issue.key, {"body":testing.comment2.text()})
         pass
     
     def test_updateAddsNewComments(self):

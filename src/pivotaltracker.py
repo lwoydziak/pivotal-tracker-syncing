@@ -7,6 +7,7 @@ import pytracker
 from tracker import Tracker
 from pivotaltrackeritem import PivotalTrackerItem
 from timezoneutc import UTC
+from trackeritemcomment import PivotalComment
 
 class PivotalTrackerFor(Tracker):
     '''
@@ -71,13 +72,13 @@ class PivotalTrackerFor(Tracker):
     def addCommentsTo(self, item):
         comments = self.trackerInstance_.GetComments(item.Id())
         for comment in comments:
-            item.addComment(comment.GetText(), 'existing')
+            item.addComment(PivotalComment(comment), 'existing')
         return item
     
     def updateCommentsFor(self, item):
         comments = item.comments('new')
         for comment in comments[:]:
             if len(comment) < self.MAX_COMMENT_LENGTH:
-                self.trackerInstance_.AddComment(item.Id(), comment)
+                self.trackerInstance_.AddComment(item.Id(), comment.text())
             #now comments in the new should be moved to existing - tbd
         return item

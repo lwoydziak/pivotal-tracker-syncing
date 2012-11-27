@@ -49,6 +49,13 @@ class RemoteStatus(object):
     id = 0
     name = None
     
+class RemoteComment(object):
+    def __init__(self, body="None", id=0, author=None):
+        self.id = id
+        self.body=body
+        self.author=author
+    
+    
     
     
     

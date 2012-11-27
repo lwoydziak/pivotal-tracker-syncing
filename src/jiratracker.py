@@ -8,6 +8,7 @@ from tracker import Tracker
 from jiratrackeritem import JiraTrackerItem
 from urllib.parse import urlparse
 from jirastatustoaction import JiraStatusToAction
+from trackeritemcomment import JiraComment
 
 NAME = 0
 JQL = 1
@@ -93,13 +94,13 @@ class JiraTracker(Tracker):
         comments = self.trackerInstance_.getComments(self.authentication_, item.Id())
         if comments is not None:
             for comment in comments:
-                item.addComment(comment['body'], 'existing')
+                item.addComment(JiraComment(comment), 'existing')
         return item
 
     def updateCommentsFor(self, item):
         comments = item.comments('new')
         for comment in comments[:]:
-            self.trackerInstance_.addComment(self.authentication_, item.Id(), {"body":comment})
+            self.trackerInstance_.addComment(self.authentication_, item.Id(), comment.forJira())
             #now comments in the new should be moved to existing - tbd
         return item     
     
