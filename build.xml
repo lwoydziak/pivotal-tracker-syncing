@@ -93,7 +93,7 @@
   	<exec executable="rm">
   		<arg value="${filelist.file}"/>
   	</exec>
-  	<exec executable="python3.2" failonerror="true">
+  	<exec executable="python3.3" failonerror="true">
   		<arg value="ensure_passing.py" />
   		<arg value="--build_step=duplication" />
   		<arg value="with_duplicate_analysis.html"/>
@@ -103,6 +103,48 @@
   	</exec>
   	  	
   </target>
+	
+  <target name="complexity" depends="init">
+        <apply executable="radon" parallel="true" failonerror="true">
+          	<arg value="cc"/> 
+          	<arg value="-s"/>
+          	<arg value="-nb"/>
+        	<fileset dir="${src.dir}">
+                    <patternset>
+                            <include name="**/*.py"/>   
+                    </patternset>
+            </fileset>      
+            <fileset dir="${test.dir}">
+                    <patternset>
+                            <include name="**/*.py"/>               
+                    </patternset>
+            </fileset>
+        </apply>
+		<exec executable="rm">
+			<arg value="-f"/>
+			<arg value=".complexity.json"/>
+		</exec>
+	    <apply executable="radon" parallel="true" failonerror="true" output=".complexity.json">
+	      	<arg value="cc"/> 
+	      	<arg value="-j"/>
+	    	<fileset dir="${src.dir}">
+	                <patternset>
+	                        <include name="**/*.py"/>   
+	                </patternset>
+	        </fileset>      
+	        <fileset dir="${test.dir}">
+	                <patternset>
+	                        <include name="**/*.py"/>               
+	                </patternset>
+	        </fileset>
+	    </apply>
+		<exec executable="python2.7" failonerror="true">
+		        <arg value="ensure_passing.py" />
+		        <arg value="--build_step=complexity" />
+				<arg value="--threshold=7"/>
+		        <arg value=".complexity.json"/>
+		</exec>
+  </target>
   
   <target name="test-coverage" depends="init,clean,test,coverage" />
 
@@ -111,8 +153,32 @@
   <target name="all" depends="test-coverage,acceptance-coverage" />
   	
   <target name="clean">
-  	<exec executable="coverage" failonerror="true">
-  		<arg value="erase"/>
+  	<path id="temp.files">
+    	<fileset dir=".">
+    	     <patternset>
+    	          <include name="**/*.pyc"/>
+		  		  <include name=".coverage*"/>
+    	     </patternset>
+    	</fileset>
+    </path>
+    <pathconvert pathsep=" " property="tempfiles" refid="temp.files"/>
+  	<exec executable="rm">
+		<arg line= "-f ${tempfiles}"/>
+    </exec>
+
+	<exec executable="rm">
+		<arg value="-f"/>
+		<arg value="with_duplicate_analysis.html"/>
+		<arg value="py.test.xml" />
+		<arg value="coverage.xml" />
+		<arg value="README.txt" />
+        <arg value="MANIFEST" />
+		<arg value=".complexity.json"/>
+    </exec>
+  	<exec executable="rm">
+  		<arg value="-rf"/>
+  		<arg value="${src.dir}/__pycache__/"/>
+  		<arg value="${test.dir}/__pycache__/"/>
   	</exec>
   </target>
   

@@ -3,6 +3,8 @@ Created on Mar 24, 2012
 
 @author: lwoydziak
 '''
+import sys
+sys.path.insert(0, '.')
 import unittest
 from pivotaltracker import PivotalTrackerFor
 from mockito.mockito import verify, when

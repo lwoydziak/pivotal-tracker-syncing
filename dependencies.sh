@@ -1,22 +1,6 @@
 #!/bin/bash
 
-PYTHON_VERSION=python3.2
-
-easy_install()
-{
-	P=$1	
-	c=$(find /usr/local/bin -iname easy_install-3*)
-	y="sudo $c $P"
-	$y
-}
-
-easy_install2()
-{
-	P=$1	
-	c=$(find /usr/local/bin -iname easy_install-2*)
-	y="sudo $c $P"
-	$y
-}
+PYTHON_VERSION=python3.3
 
 for P in wget ant $PYTHON_VERSION "${PYTHON_VERSION}-dev"
 do
@@ -40,7 +24,7 @@ then
 	sudo rm -rf build
 	easy_install2 yolk
 	sudo mv /usr/local/bin/yolk /usr/local/bin/yolk2.7
-	easy_install https://bitbucket.org/prologic/yolk3/get/tip.zip	
+	easy_install https://pypi.python.org/packages/source/y/yolk3k/yolk3k-0.7.4.tar.gz
 fi
 
 

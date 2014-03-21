@@ -15,26 +15,26 @@ do
 done
 
 
-if ! find /usr/local/bin -iname easy_install-2* | grep easy_install >/dev/null 2>&1
-then
-	echo "Python package easy_install not found, installing..."
-	sudo wget http://python-distribute.org/distribute_setup.py
-	sudo $PYTHON_VERSION distribute_setup.py
-	sudo rm -f distribute_setup.py
-	sudo rm -f distribute*.gz
-	sudo rm -rf build
-fi
+pip freeze > .pipPackageList
 
 for P in clonedigger
 do
-	if ! $PYTHON_VERSION find_package.py --package $P
-	then
+	$PYTHON_VERSION find_package.py --package $P .pipPackageList
+	case $? in
+	1)
 		echo "Python package $P not found, installing..."
-		c=$(find /usr/local/bin -iname easy_install-2*)
-		y="sudo $c $P"
-		$y
-	fi
+        y="pip install $P"
+        $y	
+		;;
+	2)
+		echo "Python package $P needs upgrade, upgrading..."
+        y="pip install --upgrade $P"
+        $y
+		;;
+	esac
 done
+
+rm -f .pipPackageList
 
 
 
